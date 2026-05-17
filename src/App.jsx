@@ -1,300 +1,310 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 
-// Complete 100 Questions with full English and Hindi translations
-const questions = [
-  { id: 1, q: "In python, _________ is raised when an operator is supplied with a value of incorrect data type.", q_hi: "पायथन में, _________ को उठाया जाता है जब किसी ऑपरेटर को गलत डेटा प्रकार के मान के साथ आपूर्ति की जाती है।", options: ["TypeError", "NameError", "ValueError", "SyntaxError"], options_hi: ["टाइपएरर", "नेमएरर", "वैल्यूएरर", "सिंटैक्सएरर"], ans: 0 },
-  { id: 2, q: "Gram, Centimeter and Second are measuring units in:", q_hi: "ग्राम, सेंटीमीटर और सेकंड _________ में मापने इकाईयाँ हैं।", options: ["MKS", "FPS", "CGS", "None of these"], options_hi: ["MKS", "FPS", "CGS", "इनमें से कोई नहीं"], ans: 2 },
-  { id: 3, q: "The ampere-hour efficiency of a lead acid cell is normally between:", q_hi: "लेड एसिड सेल की एम्पीयर-घंटा दक्षता सामान्यतः किसके बीच होती है?", options: ["20-25%", "40-50%", "60-65%", "90-95%"], options_hi: ["20-25%", "40-50%", "60-65%", "90-95%"], ans: 3 },
-  { id: 4, q: "Magnetization current in a transformer produces _________ in transformer core.", q_hi: "एक ट्रांसफॉर्मर में चुंबकीकरण धारा ट्रांसफॉर्मर कोर में _________ उत्पन्न करती है।", options: ["Eddy current", "Flux", "Power", "None of these"], options_hi: ["एड़ी करंट", "फ्लक्स", "शक्ति", "इनमें से कोई नहीं"], ans: 1 },
-  { id: 5, q: "The reaction 2RX + 2Na (Dry ether) -> R-R + 2NaX is a _________ reaction.", q_hi: "अभिक्रिया 2RX + 2Na (Dry ether) -> R-R + 2NaX एक _________ अभिक्रिया है।", options: ["Wurtz-Fittig", "Fittig", "Wurtz", "Kolbe’s"], options_hi: ["वुर्ज-फिटिग", "फिटिग", "वुर्ज", "कोल्बे"], ans: 2 },
-  { id: 6, q: "According to _________ law, the electric flux passing through any closed surface is equal to the total charge enclosed by the surface.", q_hi: "_________ नियम के अनुसार, किसी भी बंद सतह से गुजरने वाला विद्युत प्रवाह, सतह द्वारा संलग्न कुल आवेश के बराबर होता है।", options: ["Coulomb's", "Gauss'", "Fleming's", "Kirchoff's"], options_hi: ["कूलंब का", "गॉस का", "फ्लेमिंग का", "किरचॉफ का"], ans: 1 },
-  { id: 7, q: "According to Ohm's law, current flowing in a circuit is inversely proportional to:", q_hi: "ओम के नियम के अनुसार, किसी परिपथ में प्रवाहित धारा किसके व्युत्क्रमानुपाती होती है?", options: ["Voltage", "Power", "Resistance", "All of the above"], options_hi: ["वोल्टेज", "पावर", "प्रतिरोध", "उपर्युक्त सभी"], ans: 2 },
-  { id: 8, q: "Machine generating a.c. e.m.f. are called as:", q_hi: "ए.सी. ई.एम.एफ. उत्पन्न करने वाली मशीन को क्या कहा जाता है?", options: ["Alternators", "Transformers", "Modulators", "None of these"], options_hi: ["अल्टरनेटर्स", "ट्रान्सफॉर्मर्स", "माड्युलेटर्स", "इनमें से कोई नहीं"], ans: 0 },
-  { id: 9, q: "Which of the following is not a multi-user/multitasking operating system?", q_hi: "निम्न में से कौन-सा मल्टी-यूज़र / मल्टीटास्किंग ऑपरेटिंग सिस्टम नहीं है?", options: ["UNIX", "Virtual Machines (VMS)", "Mainframe", "MS-DOS"], options_hi: ["यूनिक्स", "वर्चुअल मशिन्स (वीएमएस)", "मेनफ्रेम", "एमएस-डॉस"], ans: 3 },
-  { id: 10, q: "The type of earthing suitable for sandy areas is:", q_hi: "रेतीले क्षेत्रों के लिए उपयुक्त अर्थिंग का प्रकार है:", options: ["Horizontal strip earthing", "Rod earthing", "Plate earthing", "Pipe earthing"], options_hi: ["क्षैतिज पट्टी अर्थिंग", "छड़ अर्थिंग", "प्लेट अर्थिंग", "पाइप अर्थिंग"], ans: 1 },
-  { id: 11, q: "Which of the following is not a traffic sign?", q_hi: "निम्नलिखित में से कौन-सा यातायात चिन्ह नहीं है ?", options: ["Mandatory/regulatory signs", "Cautionary signs", "Movement signs", "Information signs"], options_hi: ["अनिवार्य/नियामक चिन्ह", "सावधान करने वाले चिन्ह", "गति-विधि के चिन्ह", "सूचना चिन्ह"], ans: 2 },
-  { id: 12, q: "Which city is known as Queen of the Arabian Sea?", q_hi: "किस शहर को अरब सागर की रानी के रूप में जाना जाता है ?", options: ["Diu", "Kochi", "Mumbai", "None of the above"], options_hi: ["दीव", "कोच्चि", "मुंबई", "उपर्युक्त में से कोई नहीं"], ans: 1 },
-  { id: 13, q: "A 6 pole induction motor is supplied by a 10 pole alternator which is driven at 600 rpm. If the motor is running at 970 rpm, determine the percentage slip.", q_hi: "एक 6 पोल इंडक्शन मोटर की आपूर्ति 10 पोल अल्टरनेटर द्वारा की जाती है जो 600 rpm पर संचालित होती है। यदि मोटर 970 rpm पर चल रही है, तो प्रतिशत स्लिप निर्धारित करें ।", options: ["1%", "2%", "3%", "5%"], options_hi: ["1%", "2%", "3%", "5%"], ans: 2 },
-  { id: 14, q: "With amount of current (I), resistance (R) and time of current flow (T), the formula for converting electrical energy to heat energy (H) is:", q_hi: "विद्युत धारा की मात्रा (I), प्रतिरोध (R) और विद्युत धारा प्रवाह के समय (T) के साथ विद्युत ऊर्जा को ऊष्मा ऊर्जा (H) में परिवर्तित करने का सूत्र है", options: ["H = IRT", "H = I²RT", "H = IR", "H = V/R"], options_hi: ["H = IRT", "H = I²RT", "H = IR", "H = V/R"], ans: 1 },
-  { id: 15, q: "The practical voltage source has emf of E volts and internal resistance is r ohms. If it supplies a load current of I amperes, the terminal voltage is:", q_hi: "व्यावहारिक वोल्टेज स्रोत में E वोल्ट का emf है और आंतरिक प्रतिरोध r ओम है। यदि यह I एम्पीयर की लोड धारा की आपूर्ति करता है, तो टर्मिनल वोल्टेज क्या है ?", options: ["E", "E/r", "Ir", "E - Ir"], options_hi: ["E", "E/r", "Ir", "E - Ir"], ans: 3 },
-  { id: 16, q: "Which of the following type of instruments are non-directional and can be used for measuring both AC and DC values of current and voltage?", q_hi: "निम्नलिखित में से कौन-सा प्रकार का उपकरण गैर-दिशात्मक है और इसका उपयोग करंट और वोल्टेज के AC और DC दोनों मानों को मापने के लिए किया जा सकता है ?", options: ["Moving iron type", "Moving coil type", "Dynamometer type", "Induction type"], options_hi: ["गतिशील लौह प्रकार", "गतिमान कुंडल प्रकार", "डायनेमोमीटर प्रकार", "प्रेरण प्रकार"], ans: 0 },
-  { id: 17, q: "The members of rhodophyceae are commonly called:", q_hi: "रोडोफाइकी के सदस्य सामान्यतः कहलाते हैं ।", options: ["Red algae", "Green algae", "Blue algae", "Brown algae"], options_hi: ["लाल शैवाल", "हरी शैवाल", "नीली शैवाल", "भूरी शैवाल"], ans: 0 },
-  { id: 18, q: "The top and bottom horizontal portion of the transformer core is:", q_hi: "ट्रांसफार्मर कोर का ऊपरी और निचला क्षैतिज भाग है", options: ["Yoke", "Limb", "Winding", "Conservator"], options_hi: ["योक", "लिम्ब", "वाइन्डिंग", "कन्सर्वेटर"], ans: 0 },
-  { id: 19, q: "In delta connected system, the relation between the line current IL and phase current Iph is:", q_hi: "डेल्टा कनेक्टेड सिस्टम में लाइन करंट IL और फेज़ करंट Iph के बीच संबंध होता है", options: ["IL = Iph", "IL = Iph/√3", "IL = √3Iph", "IL = 3Iph"], options_hi: ["IL = Iph", "IL = Iph/√3", "IL = √3Iph", "IL = 3Iph"], ans: 2 },
-  { id: 20, q: "The average value of sine wave is _________ times the peak value.", q_hi: "साइन तरंग का औसत मान पीक मान का _________ गुना है।", options: ["1.414", "0.637", "0.5", "1.732"], options_hi: ["1.414", "0.637", "0.5", "1.732"], ans: 1 },
-  { id: 21, q: "Capacitance is a ratio of:", q_hi: "धारिता का अनुपात है", options: ["Voltage to voltage", "Voltage to charge", "Charge to voltage", "Charge to charge"], options_hi: ["वोल्टेज का वोल्टेज से", "वोल्टेज का चार्ज से", "चार्ज का वोल्टेज से", "चार्ज का चार्ज से"], ans: 2 },
-  { id: 22, q: "The term 'Ecosystem' was first coined by:", q_hi: "'इकोसिस्टम' शब्द सबसे पहले किसके द्वारा गढ़ा गया था ?", options: ["Sir Arthur G. Tansley", "Salim Ali", "James Hansen", "Rachel Carson"], options_hi: ["सर आर्थर जी. टांसले", "सलीम अली", "जेम्स हैनसेन", "राचेल कार्सन"], ans: 0 },
-  { id: 23, q: "_________ is used to measure the width of wires.", q_hi: "_________ का उपयोग तारों की चौड़ाई मापने के लिए किया जाता है।", options: ["Try square", "Mallet", "Wire gauge", "None of these"], options_hi: ["ट्राई स्क्वायर", "लकड़ी का हथौड़ा (मैलेट)", "तार गेज", "इनमें से कोई नहीं"], ans: 2 },
-  { id: 24, q: "The shunt resistance in an ammeter is usually:", q_hi: "एमीटर में शंट प्रतिरोध आमतौर पर होता है", options: ["less than meter resistance", "equal to meter resistance", "more than meter resistance", "of any value"], options_hi: ["मीटर प्रतिरोध से कम", "मीटर प्रतिरोध के बराबर", "मीटर प्रतिरोध से अधिक", "किसी भी मूल्य का"], ans: 0 },
-  { id: 25, q: "The reciprocal of impedance of a circuit is called:", q_hi: "किसी परिपथ की प्रतिबाधा का व्युत्क्रम कहलाता है", options: ["Resistance", "Inductance", "Capacitance", "Admittance"], options_hi: ["प्रतिरोध", "प्रेरकता", "धारिता", "प्रवेश"], ans: 3 },
-  { id: 26, q: "The seeds of the Internet were planted in:", q_hi: "इंटरनेट के बीज _________ में बोए गए थे।", options: ["1891", "1991", "1969", "1990"], options_hi: ["1891", "1991", "1969", "1990"], ans: 2 },
-  { id: 27, q: "The resistance of a lamp is 10 ohms and current through it is 2A. Its power is:", q_hi: "एक लैंप का प्रतिरोध 10 ओम है और इसके माध्यम से धारा 2A है। इसकी शक्ति है", options: ["10 W", "20 W", "30 W", "40 W"], options_hi: ["10 W", "20 W", "30 W", "40 W"], ans: 3 },
-  { id: 28, q: "A transformer operates at maximum efficiency when:", q_hi: "एक ट्रांसफार्मर अधिकतम दक्षता पर तब कार्य करता है जब", options: ["Core losses is minimum", "Iron losses is minimum", "Copper losses is minimum", "Copper loss = Iron loss"], options_hi: ["कोर की हानि न्यूनतम होती है", "लोहे की हानि न्यूनतम होती है", "तांबे की हानि न्यूनतम होती है", "तांबे की हानि = लोहे की हानि"], ans: 3 },
-  { id: 29, q: "The percentage errors in the measurement of mass and speed are 2% and 3% respectively. Maximum error in the estimation of the kinetic energy is:", q_hi: "द्रव्यमान और गति के माप में प्रतिशत त्रुटि क्रमशः 2% और 3% हैं। द्रव्यमान और गति को मापने के द्वारा प्राप्त गतिज ऊर्जा के अनुमान में अधिकतम त्रुटि कितनी होगी ?", options: ["11%", "8%", "5%", "1%"], options_hi: ["11%", "8%", "5%", "1%"], ans: 1 },
-  { id: 30, q: "This ability of a charged particle to do the work is called:", q_hi: "किसी आवेशित कण की कार्य करने की क्षमता को क्या कहा जाता है ?", options: ["Coulomb", "Electrical power", "Electric potential", "Electrical resistance"], options_hi: ["कूलम्ब", "विद्युतीय शक्ति", "विद्युत संभाव्यता", "विद्युतीय प्रतिरोध"], ans: 2 },
-  { id: 31, q: "'5S' is a system used in:", q_hi: "'5S' प्रणाली का प्रयोग _________ में किया जाता है।", options: ["Production practices", "Safety practices", "House-keeping practices", "Electrical manufacturing"], options_hi: ["उत्पादन प्रथाओं में", "सुरक्षा प्रथाओं में", "गृह-व्यवस्था की प्रथाओं में", "विद्युत विनिर्माण में"], ans: 2 },
-  { id: 32, q: "Under this Mughal ruler, Haryana came under the control of Britishers:", q_hi: "इस मुगल शासक के अधीन होने पर, हरियाणा ब्रिटिशों के नियंत्रण में आया", options: ["Mohammad Shah", "Shah Alam", "Ahmed Shah", "Bahadur Shah Jaffer"], options_hi: ["मोहम्मद शाह", "शाह आलम", "अहमद शाह", "बहादुर शाह जफर"], ans: 1 },
-  { id: 33, q: "Which type of wire joint is found in the junction box?", q_hi: "जंक्शन बॉक्स में किस प्रकार का तार जोड़ पाया जाता है ?", options: ["Rattail joint", "Plain tap joint", "Aerial tap joint", "None of these"], options_hi: ["रैटेल जॉइंट", "प्लेन टैप जॉइंट", "एरियल टैप जॉइंट", "इनमें से कोई नहीं"], ans: 0 },
-  { id: 34, q: "The average power delivered to an impedance (4-j3) by a current 5cos(100πt+100) A is:", q_hi: "विद्युत 5 cos (100πt+100) A द्वारा प्रतिबाधा (4 - j3) को दी गई औसत शक्ति है", options: ["44.2 W", "50 W", "62.5 W", "125 W"], options_hi: ["44.2 W", "50 W", "62.5 W", "125 W"], ans: 1 },
-  { id: 35, q: "In DC generators, the effect of the magnetic field set up by the armature current on the distribution of the flux under main poles is known as:", q_hi: "डीसी जनरेटर में, मुख्य ध्रुवों के नीचे प्रवाह के वितरण पर आर्मेचर धारा द्वारा स्थापित चुंबकीय क्षेत्र के प्रभाव को क्या कहा जाता है ?", options: ["Armature resistance", "Armature effect", "Armature reaction", "None of these"], options_hi: ["आर्मेचर प्रतिरोध", "आर्मेचर प्रभाव", "आर्मेचर प्रतिक्रिया", "इनमें से कोई नहीं"], ans: 2 },
-  { id: 36, q: "The end from which elements are added or deleted is called _________ of the stack.", q_hi: "जिस छोर से तत्वों को जोड़े या हटाए जाते हैं, उसे स्टैक का _________ कहा जाता है।", options: ["Top", "Bottom", "Front", "Rear"], options_hi: ["टॉप", "बॉटम", "फ्रन्ट", "रीयर"], ans: 0 },
-  { id: 37, q: "Unknown frequency can be measured using:", q_hi: "अज्ञात आवृत्ति _________ का उपयोग करके मापा जा सकता है।", options: ["Anderson's bridge", "Maxwell's bridge", "De Sauty's bridge", "Wien's bridge"], options_hi: ["एंडरसन का पुल", "मैक्सवेल का पुल", "डी सॉटी का पुल", "वियन का पुल"], ans: 3 },
-  { id: 38, q: "Sign of children near road shows possibility of _________ nearby.", q_hi: "सड़क के पास बच्चों का चिन्ह आस-पास _________ की संभावना दर्शाता है ।", options: ["School", "Park", "Home", "Hospital"], options_hi: ["स्कूल", "पार्क", "घर", "अस्पताल"], ans: 0 },
-  { id: 39, q: "Moradabad is famous for:", q_hi: "मुरादाबाद किसके लिए प्रसिद्ध है ?", options: ["Brass industry", "Sandal oil", "Newsprint factory", "Penicillin factory"], options_hi: ["पीतल उद्योग", "चंदन का तेल", "अखबारी कागज का कारखाना", "पेनिसिलिन का कारखाना"], ans: 0 },
-  { id: 40, q: "In domestic wiring, a switch is always placed in the:", q_hi: "घरेलू वायरिंग में एक स्विच हमेशा कहाँ लगाया जाता है ?", options: ["Earth wire", "Neutral wire", "Live wire", "None of these"], options_hi: ["अर्थ वायर", "तटस्थ तार", "विद्युत्मय तार", "इनमें से कोई नहीं"], ans: 2 },
-  { id: 41, q: "6 ohm and 4 ohm resistors are connected in parallel through 240V supply. Total current flowing through the circuit is:", q_hi: "6 ओम और 4 ओम प्रतिरोधक 240 V आपूर्ति के माध्यम से समानांतर में जुड़े हुए हैं। परिपथ के माध्यम से प्रवाहित होने वाली कुल विद्युत धारा है", options: ["10 A", "100 A", "24 A", "None of these"], options_hi: ["10 A", "100 A", "24 A", "इनमें से कोई नहीं"], ans: 1 },
-  { id: 42, q: "Gurugram-Manesar-Bawal region of Haryana is famous for the production of:", q_hi: "हरियाणा का गुरुग्राम-मानेसर-बावल क्षेत्र _________ के उत्पादन हेतु प्रसिद्ध है ।", options: ["Pharmaceuticals", "Sugar", "Cotton", "Automobiles"], options_hi: ["फार्मास्यूटिकल", "चीनी", "सूत", "ऑटोमोबाईल"], ans: 3 },
-  { id: 43, q: "The equipment connected between the conductor and ground, to discharge the excessive voltages to earth is:", q_hi: "अत्यधिक वोल्टेज को पृथ्वी पर डिस्चार्ज करने के लिए कंडक्टर और जमीन के बीच जुड़ा उपकरण है", options: ["Current transformer", "Voltage transformer", "Relay", "Lighting arrester"], options_hi: ["करंट ट्रांसफॉर्मर", "वोल्टेज ट्रांसफॉर्मर", "रिले", "लाइटिंग अरेस्टर"], ans: 3 },
-  { id: 44, q: "A 2 HP motor 3 hours daily, 100 W lamp 12 hours daily and 1000 W heater 3 hours daily. Total energy consumed in 30 days is:", q_hi: "एक कारखाने में, निम्नलिखित उपकरण चालू हैं : 2 HP मोटर प्रतिदिन 3 घंटे, 100 W लैंप प्रतिदिन 12 घंटे और 1000 W हीटर प्रतिदिन 3 घंटे । 30 दिनों के एक महीने में खपत की गई ऊर्जा की कुल मात्रा कितनी है ?", options: ["134.28 kWh", "36 kWh", "90 kWh", "260.28 kWh"], options_hi: ["134.28 kWh", "36 kWh", "90 kWh", "260.28 kWh"], ans: 3 },
-  { id: 45, q: "The first battle of Tarain was fought in:", q_hi: "तराइन का प्रथम युद्ध कब लड़ा गया था ?", options: ["1192", "1191", "1121", "1091"], options_hi: ["1192", "1191", "1121", "1091"], ans: 1 },
-  { id: 46, q: "In measuring instruments, under equilibrium condition, controlling torque (Tc) and deflecting torque (Td) are:", q_hi: "मापने वाले उपकरणों में संतुलन की स्थिति के तहत नियंत्रित बलाघूर्ण (Tc) और विक्षेपित बलाघूर्ण (Td) होते हैं", options: ["Tc = Td", "Tc > Td", "Tc < Td", "None of these"], options_hi: ["Tc = Td", "Tc > Td", "Tc < Td", "इनमें से कोई नहीं"], ans: 0 },
-  { id: 47, q: "What is the frequency of an ac current i = 42.42 sin(628t)?", q_hi: "ac धारा i = 42.42 sin 628t की आवृत्ति क्या है ?", options: ["50 Hz", "100 Hz", "200 Hz", "628 Hz"], options_hi: ["50 Hz", "100 Hz", "200 Hz", "628 Hz"], ans: 1 },
-  { id: 48, q: "In python, each dictionary item is a key value pair, separated through:", q_hi: "पायथन में, प्रत्येक शब्दकोश आइटम एक महत्वपूर्ण मूल्य जोड़ी है, जिसे _________ द्वारा अलग किया जाता है ।", options: [";", ",", "+", ":"], options_hi: [";", ",", "+", ":"], ans: 3 },
-  { id: 49, q: "The EMF induced in a conductor is measured by:", q_hi: "किसी चालक में प्रेरित ई.एम.एफ. किसके द्वारा मापा जाता है ?", options: ["Ohm", "Watt", "Volt", "Ampere"], options_hi: ["ओम", "वॉट", "वोल्ट", "एम्पीयर"], ans: 2 },
-  { id: 50, q: "_________ is switching device capable of making, carrying and breaking electric current under normal and overload conditions.", q_hi: "_________ स्विचिंग डिवाइस सामान्य और अधिभार स्थितियों के तहत विद्युत धारा को बनाने, ले जाने और तोड़ने में सक्षम है।", options: ["Fuse", "HRC fuse", "Lighting arrestor", "Contactor"], options_hi: ["फ्यूज", "एच.आर.सी. फ्यूज", "प्रकाश बन्दी", "संपर्ककर्ता"], ans: 3 },
-  { id: 51, q: "Which alphabet will come in the place of question mark? D, K, S, B, L, ?", q_hi: "प्रश्न चिह्न के स्थान पर कौन-सा अक्षर आएगा ? D, K, S, B, L, ?", options: ["X", "Y", "Z", "W"], options_hi: ["X", "Y", "Z", "W"], ans: 3 },
-  { id: 52, q: "Which of the following materials is a good semiconductor?", q_hi: "निम्नलिखित में से कौन-सा पदार्थ एक अच्छा अर्धचालक है ?", options: ["Copper", "Mica", "Porcelain", "Germanium"], options_hi: ["ताँबा", "अभ्रक", "चीनी-मिट्टी", "जर्मेनियम"], ans: 3 },
-  { id: 53, q: "The polarity of voltage drop across a resistor is determined by:", q_hi: "किसी प्रतिरोधक में वोल्टेज ड्रॉप की ध्रुवीयता किसके द्वारा निर्धारित की जाती है ?", options: ["The value of resistor", "The value of current", "Direction of current in resistor", "The polarity of source"], options_hi: ["प्रतिरोधक का मान", "विद्युत धारा का मान", "प्रतिरोधक में विद्युत धारा की दिशा", "स्रोत की ध्रुवीयता"], ans: 2 },
-  { id: 54, q: "The ancient sites of Kunal and Banawali in Fatehabad district of Haryana are located on the banks of river:", q_hi: "हरियाणा के फतेहाबाद जिले में कुणाल और बनावली के प्राचीन स्थल _________ नदी के किनारे स्थित हैं।", options: ["Yamuna", "Markanda", "Ghaggar", "Saraswati"], options_hi: ["यमुना", "मार्कंडा", "घग्घर", "सरस्वती"], ans: 3 },
-  { id: 55, q: "Hysteresis loss is a type of:", q_hi: "हिस्टैरिसीस हानि एक प्रकार है", options: ["Copper loss", "Iron loss", "Mechanical loss", "Friction loss"], options_hi: ["तांबे की हानि", "लोहे की हानि", "यांत्रिक हानि", "घर्षण हानि"], ans: 1 },
-  { id: 56, q: "For a 'P' pole lap wound armature of DC machine, the number of parallel paths are equal to:", q_hi: "DC मशीन के 'P' पोल लैप वाउण्ड आर्मेचर के लिए समानांतर पथों की संख्या किसके बराबर होती है ?", options: ["2", "2P", "P", "P/2"], options_hi: ["2", "2P", "P", "P/2"], ans: 2 },
-  { id: 57, q: "A _________ is used to make or break an electrical circuit.", q_hi: "विद्युत परिपथ को बनाने या तोड़ने के लिए _________ का उपयोग किया जाता है ।", options: ["Switch", "Fuse", "Potentiometer", "Wattmeter"], options_hi: ["स्विच", "फ्यूज", "विभवमापी", "वॉटमीटर"], ans: 0 },
-  { id: 58, q: "The Champaran Satyagraha was organised against the British:", q_hi: "अंग्रेजों के खिलाफ चंपारण सत्याग्रह का आयोजन किस लिए किया गया था ?", options: ["For increasing salary", "Against refusal of remission", "For forcing farmers to grow Indigo", "To protest against Jallianwalabagh"], options_hi: ["मिल श्रमिकों के वेतन में वृद्धि के लिए", "राजस्व में छूट से इनकार के विरुद्ध", "किसानों को नील की खेती के लिए मजबूर करने पर", "जलियांवाला बाग नरसंहार के खिलाफ विरोध प्रदर्शन के लिए"], ans: 2 },
-  { id: 59, q: "A type of protection which depends only the magnitude of current, without taking any cognizance of its phase angle, is known as:", q_hi: "एक प्रकार की सुरक्षा जो इसके चरण कोण का संज्ञान लिए बिना केवल धारा के परिमाण पर निर्भर करती है, कहलाती है", options: ["Over current protection", "Directional over current protection", "Non-directional over current protection", "Directional under current protection"], options_hi: ["अत्यधिक विद्युत धारा संरक्षण", "दिशीय अत्यधिक विद्युत धारा संरक्षण", "अदिशीय अत्यधिक विद्युत धारा संरक्षण", "दिशीय न्यून विद्युत धारा संरक्षण"], ans: 2 },
-  { id: 60, q: "In a diode, flow of current is:", q_hi: "डायोड में धारा का प्रवाह होता है", options: ["Unidirectional", "Bidirectional", "Reverse", "None of these"], options_hi: ["एकदिशीय", "द्विदिशीय", "रिवर्स", "इनमें से कोई नहीं"], ans: 0 },
-  { id: 61, q: "Diversity factor is the ratio of the sum of individual maximum demands to the _________ on the power station.", q_hi: "विविधता कारक पावर स्टेशन पर व्यक्तिगत अधिकतम मांगों के योग और _________ का अनुपात है ।", options: ["Maximum demand", "Total demand", "Minimum demand", "Individual demand"], options_hi: ["अधिकतम मांग", "कुल मांग", "न्यूनतम मांग", "व्यक्तिगत मांग"], ans: 0 },
-  { id: 62, q: "In Haryana, Surajkund crafts fair is held every year in the month of:", q_hi: "हरियाणा में सूरजकुंड हस्तशिल्प मेला प्रति वर्ष _________ माह में लगता है।", options: ["January", "February", "March", "April"], options_hi: ["जनवरी", "फरवरी", "मार्च", "अप्रैल"], ans: 1 },
-  { id: 63, q: "Conductance is measured in the unit:", q_hi: "चालकता को _________ इकाई में मापा जाता है।", options: ["Siemens", "Joule", "Lux", "Lux/m"], options_hi: ["सीमेंस", "जौल", "लक्स", "लक्स/मी."], ans: 0 },
-  { id: 64, q: "Which of the following is not a class of permanent magnet material used for electric machines?", q_hi: "निम्नलिखित में से कौन-सा विद्युत मशीनों के लिए प्रयुक्त स्थायी चुंबक सामग्री का एक वर्ग नहीं है ?", options: ["Alnicos", "Ceramics", "Silicon", "Samarium cobalt"], options_hi: ["अल्निकोस", "सिरामिक्स", "सिलिकॉन", "समैरियम कोबाल्ट"], ans: 2 },
-  { id: 65, q: "In 4 point starter, the No Volt Release (NVR) coil is connected in the:", q_hi: "4 प्वाइंट स्टार्टर में नो वोल्ट रिलीज (NVR) कॉइल किससे जुड़ा होता है ?", options: ["Field circuit", "Armature circuit", "Across supply line through protective resistance", "Both (A) and (B)"], options_hi: ["फील्ड सर्किट", "आर्मेचर सर्किट", "सुरक्षात्मक प्रतिरोध के माध्यम से आपूर्ति लाइन के पार", "(A) और (B) दोनों"], ans: 2 },
-  { id: 66, q: "Which number will come in the place of question mark? 9, 13, 22, 31, ?", q_hi: "प्रश्न चिह्न के स्थान पर कौन-सी संख्या आएगी ? 9, 13, 22, 31, ?", options: ["38", "39", "40", "44"], options_hi: ["38", "39", "40", "44"], ans: 2 },
-  { id: 67, q: "Distribution board is also known as a:", q_hi: "वितरण बोर्ड को _________ के नाम से भी जाना जाता है ।", options: ["Breaker panel", "Panel board", "Electric panel", "All of these"], options_hi: ["ब्रेकर पैनल", "पैनल बोर्ड", "विद्युत पैनल", "ये सभी"], ans: 3 },
-  { id: 68, q: "_________ is used to insert a new element to the queue at the rear end.", q_hi: "पीछे के सिरे पर क्यू में एक नया तत्व सम्मिलित करने के लिए _________ का उपयोग किया जाता है।", options: ["DEQUEUE", "QUEUE", "DELETE", "ENQUEUE"], options_hi: ["DEQUEUE", "QUEUE", "DELETE", "ENQUEUE"], ans: 3 },
-  { id: 69, q: "Radiation is a _________ hazard.", q_hi: "विकिरण एक _________ खतरा है।", options: ["Physical", "Chemical", "Biological", "Mechanical"], options_hi: ["भौतिक", "रासायनिक", "जैविक", "यांत्रिक"], ans: 0 },
-  { id: 70, q: "Python allows us to join two strings using concatenation operator plus which is denoted by symbol:", q_hi: "पायथन हमें कॉन्कैटिनेशन ऑपरेटर प्लस का उपयोग करके दो स्ट्रिंग्स में शामिल होने की अनुमति देता है जिसे प्रतीक _________ द्वारा दर्शाया जाता है।", options: ["+", "*", "$", "%"], options_hi: ["+", "*", "$", "%"], ans: 0 },
-  { id: 71, q: "Tree system of wiring is most suitable for:", q_hi: "वायरिंग की ट्री प्रणाली किसके लिए सबसे उपयुक्त है ?", options: ["Godown wiring", "Industrial wiring", "Domestic wiring", "Multi-storied building"], options_hi: ["गोदाम की वायरिंग", "औद्योगिक वायरिंग", "घरेलू वायरिंग", "बहुमंजिला भवन"], ans: 3 },
-  { id: 72, q: "For all practical purposes, potential of earth is taken as:", q_hi: "सभी व्यावहारिक उद्देश्यों के लिए पृथ्वी के पोटेन्शियल को किस रूप में लिया जाता है ?", options: ["Infinity", "Zero", "One", "None of these"], options_hi: ["अनंत", "शून्य", "एक", "इनमें से कोई नहीं"], ans: 1 },
-  { id: 73, q: "Statement: B < O = R ≤ N, R > A ≥ T = E. Conclusions: I. E > N, II. B > T.", q_hi: "कथन: B < O = R ≤ N, R > A ≥ T = E. निष्कर्ष: I. E > N, II. B > T.", options: ["Only I follows", "Only II follows", "Neither I nor II follows", "Both I and II follow"], options_hi: ["केवल I अनुसरण करता है", "केवल II अनुसरण करता है", "न तो I न ही II अनुसरण करता है", "I और II दोनों अनुसरण करते हैं"], ans: 2 },
-  { id: 74, q: "A transmission line is said to be an ideal line if:", q_hi: "एक ट्रांसमिशन लाइन को आदर्श लाइन कहा जाता है यदि", options: ["R = 0, G = 0", "RG = L/C", "With a large value of R and G", "RG = √C/L"], options_hi: ["R = 0, G = 0", "RG = L/C", "R और G के बड़े मान के साथ", "RG = √C/L"], ans: 0 },
-  { id: 75, q: "An energymeter is _________ instrument.", q_hi: "ऊर्जामीटर _________ उपकरण है ।", options: ["Recording", "Indicating", "Integrating", "None of these"], options_hi: ["रिकॉर्डिंग", "इंडिकेटिंग", "इंटिग्रेटिंग", "इनमें से कोई नहीं"], ans: 2 },
-  { id: 76, q: "In python _________ is used to create a list containing a sequence of integers from start to stop value.", q_hi: "पायथन में _________ का उपयोग, स्टार्ट वैल्यू से स्टॉप वैल्यू तक अनुक्रम वाली सूची बनाने के लिए किया जाता है ।", options: ["for", "range()", "while", "continue"], options_hi: ["for", "range()", "while", "continue"], ans: 1 },
-  { id: 77, q: "The _________ is a discharge of electricity through a combination of ionized air and vaporized conductor material.", q_hi: "_________ आयनित वायु और वाष्पयुक्त सामग्री के संयोजन के माध्यम से बिजली का निर्वहन है ।", options: ["Fuse", "Power arc", "MCB", "None of these"], options_hi: ["फ्यूज", "पावर आर्क", "एम.सी.बी.", "इनमें से कोई नहीं"], ans: 1 },
-  { id: 78, q: "Which of the following circuit breakers doesn't use air or gas as one of their medium?", q_hi: "निम्नलिखित में से कौन-सा सर्किट ब्रेकर अपने माध्यम के रूप में हवा या गैस का उपयोग नहीं करता है ?", options: ["Miniature circuit breaker", "Bulk oil circuit breaker", "Air blast circuit breaker", "SF6 circuit breaker"], options_hi: ["मिनिएचर सर्किट ब्रेकर", "बल्क ऑईल सर्किट ब्रेकर", "एयर ब्लास्ट सर्किट ब्रेकर", "SF6 सर्किट ब्रेकर"], ans: 1 },
-  { id: 79, q: "The Udanakootam is the intimate group of the King in the administration of:", q_hi: "उड़नकूटम किसके शासनकाल में राजा का अंतरंग समूह होता था ?", options: ["Pandyas", "Cholas", "Kadambas", "Vardhanas"], options_hi: ["पांड्य", "चोल", "कदंब", "वर्धन"], ans: 1 },
-  { id: 80, q: "_________ is an electrical breakdown of a gas that produces a prolonged electrical discharge.", q_hi: "_________ गैस का विद्युत विखंडन है जो लंबे समय तक विद्युत निर्वहन उत्पन्न करता है।", options: ["Electric spark", "Air blast", "Air brake", "Electric arc"], options_hi: ["बिजली की चिंगारी", "वायु विस्फोट", "एयर ब्रेक", "इलेक्ट्रिक आर्क"], ans: 3 },
-  { id: 81, q: "The direction of force in a motoring action is determined by:", q_hi: "मोटरिंग क्रिया में बल की दिशा किसके द्वारा निर्धारित होती है ?", options: ["Fleming's right hand rule", "Fleming's left hand rule", "End rule", "Right hand thumb rule"], options_hi: ["फ्लेमिंग का दाहिना हाथ नियम", "फ्लेमिंग का बाएँ हाथ का नियम", "अंत नियम", "दाहिने हाथ के अंगूठे का नियम"], ans: 1 },
-  { id: 82, q: "The shape of warning traffic sign is:", q_hi: "चेतावनी ट्राफिक चिन्ह का आकार क्या होता है ?", options: ["Circular", "Square", "Rectangular", "Triangular"], options_hi: ["गोलाकार", "वर्गाकार", "आयताकार", "त्रिकोणीय"], ans: 3 },
-  { id: 83, q: "The simplified form of tan⁻¹(x/y) - tan⁻¹((x-y)/(x+y)) is equal to:", q_hi: "tan⁻¹(x/y) - tan⁻¹((x-y)/(x+y)) का सरलीकृत रूप है", options: ["0", "π/4", "π/2", "π"], options_hi: ["0", "π/4", "π/2", "π"], ans: 1 },
-  { id: 84, q: "The device that converts optical energy into electrical energy is:", q_hi: "वह उपकरण जो ऑप्टिकल ऊर्जा को विद्युत ऊर्जा में परिवर्तित करता है", options: ["LED", "Photo detector", "Solar cell", "PIN diode"], options_hi: ["एलईडी", "फोटो डिटेक्टर", "सौर सेल", "पिन डायोड"], ans: 2 },
-  { id: 85, q: "_________ is a joint formed by joining two pieces of metal edge to edge.", q_hi: "धातु के दो टुकड़ों को किनारे से किनारे तक जोड़कर बना जोड़ है", options: ["Lap joint", "Butt joint", "Tee joint", "Corner joint"], options_hi: ["लैप जोड़", "बट जोड़", "टी जोड़", "कॉर्नर जोड़"], ans: 1 },
-  { id: 86, q: "Which of the following is the ideal value of earthing resistance used for large power stations?", q_hi: "बड़े विद्युत स्टेशनों के लिए उपयोग किए जाने वाले अर्थिंग प्रतिरोध का आदर्श मान निम्नलिखित में से कौन-सा है ?", options: ["1 ohm", "0.5 ohm", "5 ohm", "10 ohm"], options_hi: ["1 ओम", "0.5 ओम", "5 ओम", "10 ओम"], ans: 1 },
-  { id: 87, q: "Among five characteristics of big data, _________ represents the rate at which the data under consideration are being generated and stored.", q_hi: "बिग डेटा की पांच विशेषताओं में से, _________ उस दर को दर्शाता है जिस पर विचाराधीन डेटा सृजित और संग्रहीत किया जाता है।", options: ["Volume", "Velocity", "Variety", "Veracity"], options_hi: ["वॉल्यूम", "वेलॉसिटी", "वेराइटी", "वेरासिटी"], ans: 1 },
-  { id: 88, q: "Fuse is always connected in _________ to the circuit.", q_hi: "फ़्यूज़ हमेशा सर्किट से _________ में जुड़ा होता है।", options: ["Parallel", "Neutral", "Series", "No such specification"], options_hi: ["समानांतर", "तटस्थ", "श्रृंखला", "ऐसी कोई विशिष्टता नहीं है"], ans: 2 },
-  { id: 89, q: "The sides of an equilateral triangle are increasing at the rate of 4 cm/sec. The rate at which its area is increasing, when the side is 14 cm is:", q_hi: "एक समबाहु त्रिभुज की भुजाएँ 4 सेमी/से. की दर से बढ़ रही हैं। यदि इसकी भुजा 14 सेमी है, तो क्षेत्रफल के बढ़ने की दर है", options: ["10√3 cm²/sec", "14√3 cm²/sec", "28√3 cm²/sec", "14 cm²/sec"], options_hi: ["10√3 सेमी²/से.", "14√3 सेमी²/से.", "28√3 सेमी²/से.", "14 सेमी²/से."], ans: 2 },
-  { id: 90, q: "In 3 phase systems, 3 voltages have same magnitude and frequency but with a phase difference of _________ degrees.", q_hi: "3 चरण प्रणालियों में, 3 वोल्टेज में समान परिमाण और आवृत्ति होती है लेकिन _________ डिग्री के चरण अंतर होते हैं ।", options: ["30", "60", "90", "120"], options_hi: ["30", "60", "90", "120"], ans: 3 },
-  { id: 91, q: "The value of resistance is measured by:", q_hi: "प्रतिरोध का मान किसके द्वारा मापा जाता है ?", options: ["Wattmeter", "Ohmmeter", "Voltmeter", "Currentmeter"], options_hi: ["वॉटमीटर", "ओममीटर", "वोल्टमीटर", "करंटमीटर"], ans: 1 },
-  { id: 92, q: "Data which have no well-defined structure but maintains internal tags or markings to separate data elements are called:", q_hi: "वह डेटा जिसमें कोई अच्छी तरह से परिभाषित संरचना नहीं है लेकिन डेटा तत्वों को अलग करने के लिए आंतरिक टैग या चिह्नों को बनाए रखता है, जिसे _________ कहा जाता है।", options: ["Structured data", "Unstructured data", "Semi-structured data", "Organized data"], options_hi: ["संरचित डेटा", "असंरचित डेटा", "अर्ध-संरचित डेटा", "संगठित डेटा"], ans: 2 },
-  { id: 93, q: "Which safety device should be used while driving a two-wheeler?", q_hi: "दो-पहिया वाहन चलाते समय किस सुरक्षा उपकरण का उपयोग करना चाहिए ?", options: ["Helmet", "Seatbelt", "Airbag", "None of the above"], options_hi: ["हेल्मेट", "सीटबेल्ट", "एयरबैग", "उपरोक्त में से कोई नहीं"], ans: 0 },
-  { id: 94, q: "This instrument of Haryana is in the shape of cup containing 2 cymbals and made up of brass:", q_hi: "हरियाणा का यह यंत्र पीतल से बने 2 झांझ वाले कप की आकृति का होता है", options: ["Manjira", "Taasha", "Dholak", "Sarangi"], options_hi: ["मंजीरा", "ताशा", "ढ़ोलक", "सारंगी"], ans: 0 },
-  { id: 95, q: "The current in an open circuit is:", q_hi: "खुले परिपथ में धारा कितनी होती है ?", options: ["normally very high", "usually high enough to blow the fuse", "zero", "slightly below normal"], options_hi: ["सामान्यतः बहुत अधिक", "आमतौर पर सर्किट फ्यूज़ को ब्लो करने के लिए पर्याप्त ऊँचा होता है", "शून्य", "सामान्य से थोड़ा नीचे"], ans: 2 },
-  { id: 96, q: "_________ is amount of luminous flux given out in a space represented by one unit solid angle by a source having an intensity of one candle power in all directions.", q_hi: "_________ को कैन्डल शक्ति की तीव्रता वाले स्रोत द्वारा एक इकाई ठोस कोण द्वारा दर्शाए गए स्थान में दिए गए ल्यूमिनस फ्लक्स की मात्रा के रूप में परिभाषित किया जाता है।", options: ["Lumen", "Luminous intensity", "Light", "Candela"], options_hi: ["ल्यूमेन", "ल्यूमिनस इंटेन्सिटि", "लाइट", "कैन्डेला"], ans: 0 },
-  { id: 97, q: "In a dynamometer wattmeter, the fixed coil is:", q_hi: "डायनेमोमीटर वॉटमीटर में स्थिर कुण्डली होती है", options: ["Current coil", "Potential coil", "Voltage coil", "Resistance coil"], options_hi: ["विद्युत कुंडल", "संभावित कुंडल", "वोल्टेज कुंडल", "प्रतिरोध कुंडल"], ans: 0 },
-  { id: 98, q: "The layout of this wiring is done under the plaster of the wall of the building:", q_hi: "इस वायरिंग का लेआउट बिल्डिंग की दीवार के प्लास्टर के नीचे किया जाता है", options: ["Conduit wiring", "Cleat wiring", "Casing-capping", "Concealed wiring"], options_hi: ["कंड्यूट वायरिंग", "क्लीट वायरिंग", "केसिंग-केपिंग", "कंसील्ड वायरिंग"], ans: 3 },
-  { id: 99, q: "The probability of happening of an event A is 0.5 and that of B is 0.3. If A and B are mutually exclusive events, then the probability of happening neither A nor B is:", q_hi: "एक घटना A के होने की प्रायिकता 0.5 है और B की 0.3 है। यदि A और B परस्पर अनन्य घटनाएँ हैं, तो न तो A न ही B होने की प्रायिकता है", options: ["0.4", "0.5", "0.2", "0.9"], options_hi: ["0.4", "0.5", "0.2", "0.9"], ans: 2 },
-  { id: 100, q: "1 yard is equivalent of _________ feet.", q_hi: "1 गज _________ फीट के बराबर है।", options: ["1", "2", "3", "4"], options_hi: ["1", "2", "3", "4"], ans: 2 }
+// Full 100 Questions Dataset
+// h = Hindi Question, e = English Question, oh = Options (Hindi), oe = Options (English), a = Correct Answer Index (0-3)
+const questionsData = [
+  { id: 1, h: "एक होल का साइज 50.000+0.005+0.025 mm है और शाफ्ट का साइज 50.000+0.030+0.040 mm है। इस फिट (Fit) में 'Minimum Interference' का मान क्या होगा?", e: "A hole size is 50.000+0.005+0.025 mm and shaft size is 50.000+0.030+0.040 mm. What will be the value of 'Minimum Interference' in this fit?", oh: ["0.015 mm", "0.005 mm", "0.035 mm", "0.020 mm"], oe: ["0.015 mm", "0.005 mm", "0.035 mm", "0.020 mm"], a: 1 },
+  { id: 2, h: "भारतीय मानक प्रणाली (IS) के अनुसार, बुनियादी टॉलरेंस (Fundamental Tolerances) के 18 ग्रेड कहाँ से कहाँ तक नामित होते हैं?", e: "According to the Indian Standard (IS) system, the 18 grades of Fundamental Tolerances are designated from where to where?", oh: ["IT1 से IT18", "ITO से IT17", "IT01, ITO से IT16", "IT01 से IT15"], oe: ["IT1 to IT18", "ITO to IT17", "IT01, ITO to IT16", "IT01 to IT15"], a: 2 },
+  { id: 3, h: "एक वर्नियर माइक्रोमीटर में वर्नियर स्केल के 10 डिवीज़न, थिम्बल स्केल के 9 डिवीज़न के बराबर हैं। यदि थिम्बल के 1 भाग का मान 0.01 mm है, तो इस यंत्र का अल्पतमांक (Least Count) क्या होगा?", e: "In a vernier micrometer, 10 divisions of the vernier scale are equal to 9 divisions of the thimble scale. If the value of 1 division of the thimble is 0.01 mm, what will be the least count of this instrument?", oh: ["0.01 mm", "0.02 mm", "0.0001 mm", "0.001 mm"], oe: ["0.01 mm", "0.02 mm", "0.0001 mm", "0.001 mm"], a: 3 },
+  { id: 4, h: "डायल टेस्ट इंडिकेटर (Plunger Type) में प्लंजर की रैखिक गति को सूचक की घूर्णन गति में बदलने के लिए किस गियर मैकेनिज्म का उपयोग किया जाता है?", e: "Which gear mechanism is used in a Dial Test Indicator (Plunger Type) to convert the linear motion of the plunger into rotary motion of the pointer?", oh: ["रैक और पिनियन मैकेनिज्म", "लीवर और स्क्रॉल मैकेनिज्म", "वर्म और वर्म व्हील", "बेवल गियर मैकेनिज्म"], oe: ["Rack and pinion mechanism", "Lever and scroll mechanism", "Worm and worm wheel", "Bevel gear mechanism"], a: 0 },
+  { id: 5, h: "किस विशेष 'Jig' का उपयोग पतली और अनियमित आकार की शीट या वर्कपीस को बिना किसी बेस प्लेट के दोनों तरफ से क्लैंप करके ड्रिलिंग करने के लिए किया जाता है?", e: "Which special 'Jig' is used for drilling thin and irregularly shaped sheets or workpieces by clamping them from both sides without any base plate?", oh: ["चैनल जिग", "सैंडविच जिग", "बॉक्स जिग", "इंडेक्सिंग जिग"], oe: ["Channel jig", "Sandwich jig", "Box jig", "Indexing jig"], a: 1 },
+  { id: 6, h: "जिग और फिक्स्चर डिज़ाइन में '3-2-1 प्रिंसिपल' का उपयोग वर्कपीस के कितने डिग्रियों के मूवमेंट (Degrees of Freedom) को प्रतिबंधित करने के लिए किया जाता है?", e: "In jig and fixture design, the '3-2-1 principle' is used to restrict how many degrees of freedom of the workpiece?", oh: ["9 डिग्रियों को", "6 डिग्रियों को", "12 डिग्रियों को", "3 डिग्रियों को"], oe: ["9 degrees", "6 degrees", "12 degrees", "3 degrees"], a: 0 },
+  { id: 7, h: "मिलिंग फिक्स्चर में कटर को वर्कपीस के सापेक्ष सही स्थिति में सेट करने और फीड देने से पहले जाँच करने के लिए किसका उपयोग किया जाता है?", e: "In a milling fixture, what is used to set the cutter in the correct position relative to the workpiece and check it before feeding?", oh: ["गाइड बुश और प्लग गेज", "लोकेटिंग पिन और क्लैंप", "सेटिंग ब्लॉक और फीलर गेज", "टेम्पलेट और स्क्राइबर"], oe: ["Guide bush and plug gauge", "Locating pin and clamp", "Setting block and feeler gauge", "Template and scriber"], a: 2 },
+  { id: 8, h: "अत्यधिक उच्च गति और बहुत कम रेडियल स्पेस वाले अनुप्रयोगों (जैसे एयरक्राफ्ट टर्बाइन या सुपरचार्जर शाफ्ट) के लिए किस बेयरिंग को प्राथमिकता दी जाती है?", e: "Which bearing is preferred for applications with extremely high speed and very low radial space (like aircraft turbines or supercharger shafts)?", oh: ["थ्रस्ट बॉल बेयरिंग", "नीडल रोलर बेयरिंग", "टेपर रोलर बेयरिंग", "सॉलिड स्लीव बेयरिंग"], oe: ["Thrust ball bearing", "Needle roller bearing", "Taper roller bearing", "Solid sleeve bearing"], a: 1 },
+  { id: 9, h: "गेज और ब्लॉक की अत्यधिक सटीक सतह फिनिशिंग के लिए 'Lapping' प्रक्रिया में किस कठोरतम कृत्रिम अपघर्षक (Artificial Abrasive) का उपयोग किया जाता है, जो केवल टंगस्टन कार्बाइड को भी लैप कर सकता है?", e: "Which hardest artificial abrasive is used in the 'Lapping' process for highly precise surface finishing of gauges and blocks, which can even lap tungsten carbide?", oh: ["बोरॉन कार्बाइड", "सिलिकॉन कार्बाइड", "एल्युमीनियम ऑक्साइड", "जिरकोनिया एल्युमिना"], oe: ["Boron carbide", "Silicon carbide", "Aluminum oxide", "Zirconia alumina"], a: 0 },
+  { id: 10, h: "उच्च दाब वाली स्टीम और हाइड्रोलिक पाइप लाइनों में द्रव के प्रवाह को पूरी तरह सीधे (बिना किसी दिशा परिवर्तन या थ्रॉटलिंग प्रतिरोध के) गुजरने देने के लिए किस वाल्व का चयन किया जाता है?", e: "Which valve is selected in high-pressure steam and hydraulic pipelines to allow fluid flow completely straight (without any change in direction or throttling resistance)?", oh: ["ग्लोब वाल्व", "नीडल वाल्व", "गेट वाल्व", "प्लग वाल्व"], oe: ["Globe valve", "Needle valve", "Gate valve", "Plug valve"], a: 2 },
+  { id: 11, h: "लेथ मशीन पर अत्यधिक अनियमित और असंतुलित भारी जॉब (जैसे क्रैंकशाफ्ट) की टर्निंग करते समय, जॉब को फोर-जॉ चक में पकड़ने के बाद फेस प्लेट पर संतुलित करने के लिए किसका प्रयोग आवश्यक है?", e: "While turning a highly irregular and unbalanced heavy job (like a crankshaft) on a lathe, what is necessary to balance the job on the face plate after chucking it in a four-jaw chuck?", oh: ["स्टडी REST", "काउंटर वेट (Counter Weights)", "टेलस्टॉक डेड सेंटर", "ड्राइविंग डॉग"], oe: ["Steady REST", "Counter Weights", "Tailstock dead center", "Driving dog"], a: 1 },
+  { id: 12, h: "स्टील की 'Austenite' संरचना को बहुत धीमी गति से भट्टी के अंदर ही ठंडा करने पर कौन सा अंतिम विन्यास प्राप्त होता है जो अत्यधिक नरम और डक्टाइल होता है?", e: "What final structure is obtained when the 'Austenite' structure of steel is cooled very slowly inside the furnace, making it extremely soft and ductile?", oh: ["मार्टेंसाइट", "पियरलाइट (Pearlite)", "बेनाइट", "सीमेंटाइट"], oe: ["Martensite", "Pearlite", "Bainite", "Cementite"], a: 1 },
+  { id: 13, h: "'Epicyclic Gear Train' का मुख्य अनुप्रयोग कहाँ देखने को मिलता है जहाँ बहुत ही सीमित स्थान पर अत्यधिक उच्च टॉर्क और गति परिवर्तन की आवश्यकता होती है?", e: "Where is the main application of 'Epicyclic Gear Train' seen where extremely high torque and speed changes are required in a very limited space?", oh: ["ऑटोमोबाइल गियरबॉक्स और डिफरेंशियल", "साधारण लेथ हेडस्टॉक", "पाइप थ्रेडिंग मशीन", "शेपर मशीन ड्राइव"], oe: ["Automobile gearbox and differential", "Ordinary lathe headstock", "Pipe threading machine", "Shaper machine drive"], a: 0 },
+  { id: 14, h: "किस विशेष क्लच का उपयोग केवल एक ही दिशा में शक्ति संचारित करने के लिए किया जाता है, और विपरीत दिशा में वह स्वतंत्र रूप से घूमता है (जैसे साइकिल का फ्रीव्हील)?", e: "Which special clutch is used to transmit power in only one direction, and freewheels in the opposite direction (like a bicycle freewheel)?", oh: ["कोन क्लच", "ओवर-रनिंग क्लच (One-way clutch)", "सेन्ट्रिफ्यूगल क्लच", "डॉग क्लच"], oe: ["Cone clutch", "Over-running clutch (One-way clutch)", "Centrifugal clutch", "Dog clutch"], a: 1 },
+  { id: 15, h: "पाइप फिटिंग वाल्वों में, रिपेयरिंग के दौरान बिना पूरी पाइपलाइन को खाली किए केवल इंटरनल पैकिंग बदलने की सुविधा देने वाले मैकेनिज्म को क्या कहा जाता है?", e: "In pipe fitting valves, what is the mechanism called that allows changing only the internal packing during repairs without emptying the entire pipeline?", oh: ["थ्रॉटलिंग सीट", "बैक-सीटिंग मैकेनिज्म (Back-seating)", "बाईपास वाल्व", "ग्लैंड नट असेंबली"], oe: ["Throttling seat", "Back-seating mechanism", "Bypass valve", "Gland nut assembly"], a: 1 },
+  { id: 16, h: "वर्नियर बेवल प्रोटेक्टर में, यदि मुख्य स्केल की रीडिंग 32 डिग्री है और वर्नियर स्केल का 9वाँ भाग मुख्य स्केल की वामावर्त दिशा की रेखा से बिल्कुल मिल रहा है, तो कुल कोण क्या होगा?", e: "In a vernier bevel protector, if the main scale reading is 32 degrees and the 9th division of the vernier scale exactly aligns with a main scale line in counter-clockwise direction, what is the total angle?", oh: ["32°09′", "32°15′", "32°45′", "31°55′"], oe: ["32°09′", "32°15′", "32°45′", "31°55′"], a: 2 },
+  { id: 17, h: "एक 200 mm लंबे 'Sine Bar' का उपयोग करके 30° का कोण मापा जाना है। इसके लिए स्लिप गेज के ब्लॉक की कुल ऊंचाई (H) कितनी होनी चाहिए? (sin 30°=0.5)", e: "An angle of 30° is to be measured using a 200 mm long 'Sine Bar'. What should be the total height (H) of the slip gauge blocks for this? (sin 30° = 0.5)", oh: ["100 mm", "50 mm", "150 mm", "200 mm"], oe: ["100 mm", "50 mm", "150 mm", "200 mm"], a: 0 },
+  { id: 18, h: "ग्राइंडिंग व्हील की 'Loading' और 'Glazing' दोनों समस्याओं को एक ही बार में दूर करके नए और तीखे एब्रेसिव ग्रेन्स को बाहर निकालने की कंबाइंड मैकेनिकल प्रक्रिया क्या कहलाती है?", e: "What is the combined mechanical process called that removes both 'Loading' and 'Glazing' issues of a grinding wheel at once and exposes new sharp abrasive grains?", oh: ["ट्रूइंग (Truing)", "लैपिंग", "ड्रेसिंग (Dressing)", "टर्निंग"], oe: ["Truing", "Lapping", "Dressing", "Turning"], a: 2 },
+  { id: 19, h: "किस गियर व्हील का उपयोग दो ऐसे नॉन-इंटरसेक्टिंग और नॉन-पैरेलल शाफ्ट्स के बीच शक्ति संचारित करने के लिए किया जाता है जो अलग-अलग तलों (Planes) में स्थित होते हैं?", e: "Which gear wheel is used to transmit power between two non-intersecting and non-parallel shafts located in different planes?", oh: ["हाइपॉइड गियर (Hypoid Gears)", "हेरिंगबोन गियर", "मिटर गियर", "हेलिकल गियर"], oe: ["Hypoid Gears", "Herringbone gear", "Miter gear", "Helical gear"], a: 0 },
+  { id: 20, h: "लेथ मशीन पर भारी मात्रा में धातु को बहुत तेजी से हटाने (Rough Turning) के लिए सिंगल पॉइंट कटिंग टूल में कौन सा एंगल सबसे महत्वपूर्ण भूमिका निभाता है जो चिप्स के प्रवाह को नियंत्रित करता है?", e: "Which angle in a single point cutting tool plays the most important role in controlling chip flow for rapidly removing a large amount of metal (Rough Turning) on a lathe?", oh: ["साइड रेक एंगल (Side Rake Angle)", "एंड क्लीयरेंस एंगल", "लिप एंगल", "नोज़ रेडियस"], oe: ["Side Rake Angle", "End Clearance Angle", "Lip angle", "Nose radius"], a: 0 },
+  { id: 21, h: "'Anodizing' प्रक्रिया का उपयोग विशेष रूप से किस धातु की सतह पर एक सुरक्षात्मक और संक्षारण-रोधी ऑक्साइड की परत चढ़ाने के लिए किया जाता है?", e: "'Anodizing' process is specifically used to apply a protective and anti-corrosive oxide layer on the surface of which metal?", oh: ["कॉपर", "जिंक", "कास्ट आयरन", "एल्युमीनियम"], oe: ["Copper", "Zinc", "Cast iron", "Aluminum"], a: 3 },
+  { id: 22, h: "मापन विज्ञान में 'Taylor's Principle' विशेष रूप से किसके डिज़ाइन और अनुप्रयोग से संबंधित है?", e: "In metrology, 'Taylor's Principle' is specifically related to the design and application of what?", oh: ["लिमिट गेज (Go and No-Go Gauges)", "माइक्रोमीटर थिम्बल", "डायल टेस्ट इंडिकेटर", "साइन बार रोलर्स"], oe: ["Limit Gauges (Go and No-Go Gauges)", "Micrometer thimble", "Dial test indicator", "Sine bar rollers"], a: 0 },
+  { id: 23, h: "किस विशिष्ट 'Fit' के अंतर्गत इंटरनेशनल ऑर्गनाइजेशन फॉर स्टैंडरडाइजेशन (ISO) प्रणाली में H7/g6 को वर्गीकृत किया जाता है?", e: "Under which specific 'Fit' is H7/g6 classified in the International Organization for Standardization (ISO) system?", oh: ["प्रिसिजन रनिंग क्लीयरेंस फिट", "इंटरफेरेंस फिट", "ट्रांजिशन फिट", "फोर्स फिट"], oe: ["Precision running clearance fit", "Interference fit", "Transition fit", "Force fit"], a: 0 },
+  { id: 24, h: "लेथ मशीन पर लंबी लीड वाली 'Multi-start Thread' काटते समय, मशीन के लीड स्क्रू की गति और स्पिंडल की गति का अनुपात किस पर निर्भर करता है?", e: "While cutting a long lead 'Multi-start Thread' on a lathe machine, the ratio of the machine's lead screw speed and the spindle speed depends on what?", oh: ["चूड़ी की पिच (Pitch) पर", "चूड़ी की गहराई पर", "चूड़ी की लीड (Lead) पर", "टूल के आकार पर"], oe: ["On the pitch of the thread", "On the depth of thread", "On the lead of the thread", "On the tool size"], a: 2 },
+  { id: 25, h: "शाफ्ट के साथ हब के सापेक्ष कोणीय गति (Angular Movement) को पूरी तरह रोकते हुए केवल अक्षीय गति (Axial Sliding) की अनुमति देने वाली 'Key' को क्या कहा जाता है?", e: "What is the 'Key' called that completely prevents angular movement relative to the hub with the shaft while allowing only axial movement (Axial Sliding)?", oh: ["वुडरफ की", "फेदर की (Feather Key)", "जिब हेड की", "फ्लैट सैडल की"], oe: ["Woodruff key", "Feather Key", "Gib head key", "Flat saddle key"], a: 1 },
+  { id: 26, h: "स्टील के पुर्जों को कार्बन-समृद्ध वातावरण में गर्म करके उनकी सतह पर कार्बन की मात्रा बढ़ाने की प्रक्रिया 'Carburizing' कहलाती है। इसके बाद पुर्जे में पूर्ण कठोरता प्राप्त करने के लिए कौन सा चरण अनिवार्य है?", e: "Heating steel parts in a carbon-rich environment to increase carbon on the surface is 'Carburizing'. What step is mandatory after this to achieve full hardness in the part?", oh: ["एनीलिंग", "नॉर्मलाइजिंग", "शमन और तपन (Quenching & Tempering)", "नाइट्राइडिंग"], oe: ["Annealing", "Normalizing", "Quenching & Tempering", "Nitriding"], a: 2 },
+  { id: 27, h: "किस 'Bearing Lubrication Method' के अंतर्गत तेल की एक निरंतर पतली फिल्म को बाहरी दबाव के बिना, केवल शाफ्ट की तेज घूर्णन गति के कारण उत्पन्न हाइड्रोडायनामिक दबाव से बनाए रखा जाता है?", e: "Under which 'Bearing Lubrication Method' is a continuous thin film of oil maintained by the hydrodynamic pressure generated purely by the fast rotational speed of the shaft, without external pressure?", oh: ["थिक-फिल्म लुब्रिकेशन (Thick-film/Hydrodynamic)", "बाउंड्री लुब्रिकेशन", "हाइड्रोस्टेटिक लुब्रिकेशन", "स्प्लैश लुब्रिकेशन"], oe: ["Thick-film/Hydrodynamic Lubrication", "Boundary lubrication", "Hydrostatic lubrication", "Splash lubrication"], a: 0 },
+  { id: 28, h: "यदि एक नए रीमर से सुराख करने के बाद सुराख का आकार बड़ा बन जाता है और उसकी सतह पर बहुत अधिक खरोंचें (Scratches) आती हैं, तो इसका मुख्य तकनीकी कारण क्या है?", e: "If a hole becomes oversized and gets excessive scratches on its surface after reaming with a new reamer, what is the main technical reason for this?", oh: ["रीमर का व्यास कम होना", "रीमर के दांतों पर 'Built-up Edge' का बनना या अत्यधिक चिप्स का फंसना", "कूलेंट का बहुत ज्यादा उपयोग", "फीड रेट का बहुत कम होना"], oe: ["Reamer diameter being less", "Formation of 'Built-up Edge' on reamer teeth or excessive chip clogging", "Too much coolant use", "Feed rate being very low"], a: 1 },
+  { id: 29, h: "एक के बाद एक कई स्लिप गेजों को आपस में रगड़कर जोड़ने (Wringing) के बाद, उनके बीच काम करने वाला कौन सा आणविक बल उन्हें गिरने से रोकता है?", e: "After joining multiple slip gauges by rubbing them against each other (Wringing), which molecular force acting between them prevents them from falling?", oh: ["गुरुत्वाकर्षण बल", "घर्षण बल", "आसंजन और वायुमंडलीय दाब (Cohesion, Adhesion & Atmospheric pressure)", "चुंबकीय बल"], oe: ["Gravitational force", "Frictional force", "Cohesion, Adhesion & Atmospheric pressure", "Magnetic force"], a: 2 },
+  { id: 30, h: "अत्यधिक उच्च तापमान और उच्च दाब वाली केमिकल पाइपलाइनों में फ्लैंज जोड़ों के बीच लीकेज को पूरी तरह रोकने के लिए किस सामग्री के 'Gasket' का उपयोग किया जाता है?", e: "Which material 'Gasket' is used to completely prevent leakage between flange joints in extremely high-temperature and high-pressure chemical pipelines?", oh: ["रबर", "साधारण कागज", "सिंथेटिक टेफ्लॉन या स्पाइरल घाव धातु (Spiral Wound Metallic/Teflon)", "चमड़ा (Leather)"], oe: ["Rubber", "Ordinary paper", "Synthetic Teflon or Spiral Wound Metallic/Teflon", "Leather"], a: 2 },
+  { id: 31, h: "एक ओपन बेल्ट ड्राइव (Drive) में बड़ी पुली का व्यास 400 mm और छोटी पुली का व्यास 200 mm है। यदि दोनों शाफ्ट्स के केंद्रों के बीच की दूरी 2000 mm है, तो बेल्ट की कुल लंबाई ज्ञात करने का सही गणितीय सूत्र क्या होगा?", e: "In an open belt drive, the diameter of large pulley is 400 mm and small pulley is 200 mm. If the distance between the centers of both shafts is 2000 mm, what is the correct mathematical formula to find the total belt length?", oh: ["L = 2C + (π/2)(D+d) + (D-d)²/4C", "L = 2C + π(D+d)", "L = C + 4π(D-d)", "L = 2C + (π/2)(D+d) + (D+d)²/4C"], oe: ["L = 2C + (π/2)(D+d) + (D-d)²/4C", "L = 2C + π(D+d)", "L = C + 4π(D-d)", "L = 2C + (π/2)(D+d) + (D+d)²/4C"], a: 0 },
+  { id: 32, h: "MIG वेल्डिंग में प्रयुक्त होने वाले वायर इलेक्ट्रोड पर तांबे (Copper) की एक बहुत पतली परत क्यों चढ़ाई जाती है?", e: "Why is a very thin layer of Copper applied to the wire electrode used in MIG welding?", oh: ["वेल्डिंग का तापमान कम करने के लिए", "जंग से बचाने और बेहतर विद्युत चालकता (Electrical Contact) सुनिश्चित करने के लिए", "वायर को कठोर बनाने के लिए", "गैस के प्रवाह को रोकने के लिए"], oe: ["To reduce welding temperature", "To prevent rust and ensure better electrical contact", "To harden the wire", "To prevent gas flow"], a: 1 },
+  { id: 33, h: "ग्रे कास्ट आयरन की मशीनिंग या वेल्डिंग के बाद उसमें दरारें पड़ने से बचाने के लिए वेल्डिंग से ठीक पहले कौन सी तापीय प्रक्रिया अत्यंत आवश्यक है?", e: "To prevent cracks in grey cast iron after machining or welding, which thermal process is extremely necessary right before welding?", oh: ["तीव्र शमन (Rapid Quenching)", "एनीलिंग", "प्री-हीटिंग (Pre-heating) 250°C से 300°C तक", "सायनाइडिंग"], oe: ["Rapid Quenching", "Annealing", "Pre-heating up to 250°C - 300°C", "Cyaniding"], a: 2 },
+  { id: 34, h: "लेथ मशीन पर लंबे टेपर शाफ्ट को 'Tailstock Offset Method' द्वारा टर्न करते समय, ऑफसेट की अधिकतम मात्रा ज्ञात करने का सही सूत्र क्या है (जहाँ L= जॉब की कुल लंबाई, l= टेपर की लंबाई, D= बड़ा व्यास, d= छोटा व्यास)?", e: "While turning a long taper shaft on a lathe via 'Tailstock Offset Method', what is the formula to find maximum offset amount (L=Total length, l=Taper length, D=Major dia, d=Minor dia)?", oh: ["x = (D-d)/2 * l/L", "x = (D-d)/2", "x = (D-d)/l", "x = (D-d)/2 * L/l"], oe: ["x = (D-d)/2 * l/L", "x = (D-d)/2", "x = (D-d)/l", "x = (D-d)/2 * L/l"], a: 3 },
+  { id: 35, h: "एक ग्राइंडिंग व्हील के विनिर्देशन (Specification) मार्क 'A46K5V' में अक्षर 'K' व्हील की किस विशेषता को वैज्ञानिक रूप से परिभाषित करता है?", e: "In a grinding wheel specification mark 'A46K5V', the letter 'K' scientifically defines which characteristic of the wheel?", oh: ["व्हील का एब्रेसिव प्रकार", "व्हील की ओपन संरचना", "विट्रीफाइड बॉन्ड", "व्हील का मध्यम श्रेणी का ग्रेड (Medium Grade)"], oe: ["Abrasive type of the wheel", "Open structure of the wheel", "Vitrified bond", "Medium Grade of the wheel"], a: 3 },
+  { id: 36, h: "टीआईजी (TIG) वेल्डिंग में अत्यधिक उच्च तापमान पर भी बिना पिघले स्थिर आर्क बनाए रखने के लिए किस धातु के इलेक्ट्रोड का उपयोग किया जाता है जिसका गलनांक 3422°C होता है?", e: "In TIG welding, which metal electrode with a melting point of 3422°C is used to maintain a stable arc without melting even at extremely high temperatures?", oh: ["क्रोमियम", "टंगस्टन (Tungsten)", "टाइटेनियम", "वैनेडियम"], oe: ["Chromium", "Tungsten", "Titanium", "Vanadium"], a: 1 },
+  { id: 37, h: "मास्टर गेज (Reference Gauge) को वर्किंग गेज की तुलना में अत्यधिक शुद्ध बनाए रखा जाता है। इंटरनेशनल स्टैंडर्ड के अनुसार मास्टर गेज की विनिर्माण टॉलरेंस वर्किंग गेज का कितना हिस्सा होती है?", e: "Master gauge (Reference Gauge) is maintained to be highly accurate compared to a working gauge. According to Int. Standards, the manufacturing tolerance of the master gauge is what fraction of the working gauge?", oh: ["समान होती है", "50% होती है", "वर्किंग गेज की टॉलरेंस का 1/10 भाग (10%)", "5 गुना अधिक होती है"], oe: ["It is equal", "It is 50%", "1/10th part (10%) of the working gauge tolerance", "It is 5 times more"], a: 2 },
+  { id: 38, h: "किस विशिष्ट फिटिंग स्थिति में 'Maximum Clearance' की गणना करने के लिए होल के अधिकतम साइज में से शाफ्ट का कौन सा साइज घटाया जाता है?", e: "In which specific fitting situation is which shaft size subtracted from the maximum hole size to calculate the 'Maximum Clearance'?", oh: ["शाफ्ट का अधिकतम साइज", "होल का न्यूनतम साइज", "शाफ्ट का न्यूनतम साइज (Minimum size of shaft)", "बेसिक साइज"], oe: ["Maximum size of shaft", "Minimum size of hole", "Minimum size of shaft", "Basic size"], a: 2 },
+  { id: 39, h: "पाइप फिटिंग में प्रयोग होने वाले 'Non-Return Valve' (NRV) के अंदर द्रव के प्रवाह को विपरीत दिशा में जाने से रोकने के लिए कौन सा पार्ट स्वतः बंद हो जाता है?", e: "In a 'Non-Return Valve' (NRV) used in pipe fitting, which part automatically closes to prevent the flow of fluid in the opposite direction?", oh: ["ग्लैंड नट", "वाल्व स्टेम", "स्विंग डिस्क या लिफ्ट प्लग (Lift Plug/Disk)", "हैंड व्हील"], oe: ["Gland nut", "Valve stem", "Swing disk or Lift Plug/Disk", "Hand wheel"], a: 2 },
+  { id: 40, h: "मशीन टूल स्पिंडल्स और ऑटोमोबाइल व्हील हब्स में जहाँ भारी रेडियल और एक्सियल शॉक लोड दोनों एक साथ काम करते हैं, किस एंटी-फ्रिक्शन बेयरिंग का उपयोग अनिवार्य है?", e: "In machine tool spindles and automobile wheel hubs where heavy radial and axial shock loads work together, which anti-friction bearing is mandatory to use?", oh: ["थ्रस्ट बॉल बेयरिंग", "नीडल रोलर बेयरिंग", "टेपर रोलर बेयरिंग (Taper Roller Bearing)", "सॉलिड बुश बेयरिंग"], oe: ["Thrust ball bearing", "Needle roller bearing", "Taper Roller Bearing", "Solid bush bearing"], a: 2 },
+  { id: 41, h: "इंजन सिलेंडरों के बोर की सुपर-फिनिशिंग के लिए 'Honing' ऑपरेशन करते समय होनिंग हेड की रोटरी स्पीड और रेसिप्रोकेटिंग स्पीड के अनुपात को सटीकता से सेट करने का मुख्य उद्देश्य क्या प्राप्त करना है?", e: "When performing 'Honing' for super-finishing engine cylinder bores, what is the main objective of accurately setting the ratio of rotary speed and reciprocating speed of the honing head?", oh: ["धातु को बहुत तेजी से काटना", "20° से 45° का सटीक 'Cross-Hatch Pattern' और सही ज्यामिति", "होनिंग स्टोन को घिसने से बचाना", "सुराख का व्यास कम करना"], oe: ["Cut metal very fast", "An accurate 'Cross-Hatch Pattern' of 20° to 45° and correct geometry", "Save honing stone from wear", "Reduce hole diameter"], a: 1 },
+  { id: 42, h: "गैस कार्बोराइजिंग प्रक्रिया में स्टील के पुर्जों को भट्टी के अंदर किस हाइड्रोकार्बन गैस के प्रवाह के बीच 900°C पर गर्म किया जाता है?", e: "In the gas carburizing process, steel parts are heated at 900°C inside the furnace amidst the flow of which hydrocarbon gas?", oh: ["अमोनिया गैस", "कार्बन डाइऑक्साइड", "मीथेन या प्रोपेन गैस (Methane/Propane)", "ऑक्सीजन गैस"], oe: ["Ammonia gas", "Carbon dioxide", "Methane/Propane gas", "Oxygen gas"], a: 2 },
+  { id: 43, h: "एक बाहरी मीट्रिक थ्रेड (M16×2) के 'Effective Diameter' (पिच व्यास) की अत्यधिक शुद्धता से जाँच करने के लिए किस गेज या विधि का उपयोग किया जाता है?", e: "Which gauge or method is used to highly accurately check the 'Effective Diameter' (pitch diameter) of an external metric thread (M16×2)?", oh: ["थ्रेड रिंग गेज", "थ्री-वायर विधि के साथ आउटसाइड माइक्रोमीटर (Three-wire method)", "थ्रेड प्लग गेज", "स्क्रू पिच गेज"], oe: ["Thread ring gauge", "Outside micrometer with three-wire method", "Thread plug gauge", "Screw pitch gauge"], a: 1 },
+  { id: 44, h: "शेड्यूल नंबर (Schedule Number) पाइप की किस भौतिक और तकनीकी विशेषता को निर्दिष्ट करने के लिए उपयोग किया जाता है?", e: "Schedule Number is used to specify which physical and technical characteristic of a pipe?", oh: ["पाइप की कुल लंबाई", "पाइप की दीवार की मोटाई और दाब क्षमता (Wall Thickness)", "पाइप की सामग्री का ग्रेड", "पाइप का आंतरिक व्यास"], oe: ["Total pipe length", "Wall thickness and pressure capacity of the pipe", "Material grade of pipe", "Internal diameter of pipe"], a: 1 },
+  { id: 45, h: "हैवी ड्यूटी ट्रांसमिशन और हाई-स्पीड शाफ्ट्स पर बिना किसी विफलता के गियर को लॉक करने के लिए किस 'Key' का उपयोग किया जाता है जिसके दोनों सिरे गोल होते हैं और शाफ्ट के की-वे में पूरी तरह समाहित होती है?", e: "Which 'Key', rounded at both ends and fully enclosed in the shaft keyway, is used to lock gears on heavy-duty transmissions and high-speed shafts without failure?", oh: ["वुडरफ की", "फेदर की या पैरेलल संक की (Parallel Sunk Key)", "फ्लैट सैडल की", "टेपर पिन की"], oe: ["Woodruff key", "Feather key or Parallel Sunk Key", "Flat saddle key", "Taper pin key"], a: 1 },
+  { id: 46, h: "लेथ मशीन के हेडस्टॉक स्पिंडल के अंदरूनी मोर्स टेपर (Morse Taper) से कम शंक वाले ड्रिल को स्पिंडल में सीधे फिट करने के लिए किस एक्सेसरी का उपयोग किया जाता है?", e: "Which accessory is used to fit a drill directly into the lathe headstock spindle if the drill shank is smaller than the spindle's internal Morse Taper?", oh: ["ड्रिल सॉकेट (Drill Socket)", "ड्रिल स्लीव", "ड्रिल चक", "थ्री-जॉ चक"], oe: ["Drill Socket", "Drill Sleeve", "Drill chuck", "Three-jaw chuck"], a: 1 },
+  { id: 47, h: "वर्नियर हाइट गेज की सहायता से किसी शुद्ध जॉब पर 0.02 mm की सटीकता से मार्किंग करने के लिए इसके मूवेबल स्लाइडर के साथ किस विशेष स्क्राइबर का होना अनिवार्य है?", e: "To mark an accurate job with 0.02 mm precision using a vernier height gauge, which special scriber must be attached to its movable slider?", oh: ["स्ट्रेट स्क्राइबर", "बेंट स्क्राइबर", "ऑफसेट स्क्राइबर (Offset Scriber)", "नाइफ एज स्क्राइबर"], oe: ["Straight scriber", "Bent scriber", "Offset Scriber", "Knife edge scriber"], a: 2 },
+  { id: 48, h: "फाइलिंग करते समय 'Pinning of File' (दांतों में धातु के कणों का फंसना) के कारण जॉब की सतह पर स्क्रैच आते हैं। इस दोष को रोकने के लिए फाइल की सतह पर काम शुरू करने से पहले क्या लगाया जाता है?", e: "While filing, 'Pinning of File' (metal particles clogging teeth) causes scratches on the job surface. To prevent this defect, what is applied to the file surface before starting work?", oh: ["सॉल्युबल ऑयल", "ग्रीस", "चॉक पाउडर (Chalk)", "पानी"], oe: ["Soluble oil", "Grease", "Chalk powder", "Water"], a: 2 },
+  { id: 49, h: "शीट मेटल वर्क में अत्यधिक मोड़ने (Deep Drawing) पर चादर के कोनों पर धातु के इकट्ठा होने और मुड़ने (Wrinkling) के दोष को रोकने के लिए बेंडिंग लाइन के अंत में कौन सा कट लगाया जाता है?", e: "In sheet metal work, to prevent the defect of metal gathering and wrinkling at the corners of a sheet upon deep drawing, what cut is made at the end of the bending line?", oh: ["स्क्वायर नॉच", "वी-नॉच", "रिलीफ होल या विशेष स्लिट्स (Relief Cut)", "स्ट्रेट स्लॉट"], oe: ["Square notch", "V-notch", "Relief hole or special slits (Relief Cut)", "Straight slot"], a: 2 },
+  { id: 50, h: "'Hydrodynamic Lubrication' प्रणाली में जब शाफ्ट स्थिर अवस्था से घूमना शुरू करती है, तो उस क्षण बेयरिंग में किस प्रकार की घर्षण स्थिति उत्पन्न होती है?", e: "In a 'Hydrodynamic Lubrication' system, when the shaft starts rotating from a stationary state, what type of friction condition arises in the bearing at that moment?", oh: ["फ्लूइड फिल्म घर्षण", "शून्य घर्षण", "बाउंड्री या सॉलिड घर्षण (Boundary/Solid Friction)", "रोलिंग घर्षण"], oe: ["Fluid film friction", "Zero friction", "Boundary or Solid Friction", "Rolling friction"], a: 2 },
+  { id: 51, h: "हाइड्रोलिक पाइप मोड़ने वाली मशीन (Hydraulic Pipe Bender) में पाइप को बिना विकृत किए 90° पर मोड़ते समय न्यूट्रल एक्सिस पर क्या प्रभाव पड़ता है?", e: "When bending a pipe at 90° without deforming it in a Hydraulic Pipe Bender, what effect does it have on the neutral axis?", oh: ["न्यूट्रल एक्सिस की लंबाई बढ़ जाती है", "न्यूट्रल एक्सिस की लंबाई घट जाती है", "न्यूट्रल एक्सिस की लंबाई अपरिवर्तित रहती है (Remains unchanged)", "न्यूट्रल एक्सिस पूरी तरह नष्ट हो जाती है"], oe: ["Length of neutral axis increases", "Length of neutral axis decreases", "Length of neutral axis remains unchanged", "Neutral axis is completely destroyed"], a: 2 },
+  { id: 52, h: "मशीन के पुर्जों की सतह को अत्यधिक कठोर और अंदर के हिस्से (Core) को टफ बनाए रखने की तापीय प्रक्रिया 'Case Hardening' कहलाती है। इंडक्शन हार्डनिंग विधि में हीटिंग के लिए किस सिद्धांत का उपयोग किया जाता है?", e: "The thermal process of keeping machine part surfaces very hard and the core tough is 'Case Hardening'. Which principle is used for heating in the induction hardening method?", oh: ["केमिकल रिएक्शन", "उच्च आवृत्ति प्रत्यावर्ती धारा और भंवर धाराएँ (High-frequency Eddy Currents)", "गैस फ्लेम", "भट्टी की थर्मल रेडिएशन"], oe: ["Chemical reaction", "High-frequency Alternating Current and Eddy Currents", "Gas flame", "Thermal radiation of furnace"], a: 1 },
+  { id: 53, h: "इंटरनेशनल सिस्टम (ISO) के अनुसार, लिमिट और फिट्स की प्रणाली में कुल कितने बुनियादी विचलनों (Fundamental Deviations) को होल और शाफ्ट के लिए अलग-अलग निर्धारित किया गया है?", e: "According to the International System (ISO), how many total Fundamental Deviations have been defined separately for holes and shafts in the limits and fits system?", oh: ["18", "25", "16", "28 (A से ZC तक)"], oe: ["18", "25", "16", "28 (A to ZC)"], a: 3 },
+  { id: 54, h: "टॉर्क कनवर्टर (Torque Converter) और फ्लूइड कपलिंग में शक्ति का संचरण इनपुट शाफ्ट से आउटपुट शाफ्ट तक विशुद्ध रूप से किसके माध्यम से होता है?", e: "In a Torque Converter and Fluid Coupling, power transmission from the input shaft to the output shaft occurs purely through what?", oh: ["गियर्स के सीधे संपर्क से", "फ्रिक्शन क्लच प्लेट से", "द्रव की गतिज ऊर्जा (Kinetic Energy of Fluid) द्वारा", "चेन ड्राइव से"], oe: ["Direct contact of gears", "Friction clutch plate", "Kinetic Energy of Fluid", "Chain drive"], a: 2 },
+  { id: 55, h: "विमानों के ढांचों (Aircraft Structures) और पतली चादरों के जोड़ों में जहाँ अत्यधिक कंपन होता है और भार बहुत कम रखना होता है, किस रिवेट का उपयोग किया जाता है?", e: "Which rivet is used in aircraft structures and thin sheet joints where there is excessive vibration and weight must be kept very low?", oh: ["स्नैप हेड रिवेट", "एल्युमीनियम या डीयूरालमिन की पॉप/ब्लाइंड रिवेट (Duralumin Pop Rivet)", "काउंटरशंक हेड रिवेट", "पैन हेड रिवेट"], oe: ["Snap head rivet", "Aluminum or Duralumin Pop/Blind Rivet", "Countersunk head rivet", "Pan head rivet"], a: 1 },
+  { id: 56, h: "इंजीनियरिंग ड्राइंग और मापन में 'Upper Deviation' की सही तकनीकी परिभाषा क्या है?", e: "What is the correct technical definition of 'Upper Deviation' in engineering drawing and measurement?", oh: ["अधिकतम साइज और न्यूनतम साइज का अंतर", "एक्चुअल साइज और बेसिक साइज का अंतर", "अधिकतम लिमिट साइज और बेसिक साइज का बीजगणितीय अंतर", "टॉलरेंस का आधा भाग"], oe: ["Difference between max and min size", "Difference between actual and basic size", "Algebraic difference between maximum limit size and basic size", "Half part of tolerance"], a: 2 },
+  { id: 57, h: "एक साइन बार की ऊपरी सतह की समतलता (Flatness) और दोनों रोलर्स के व्यास की शुद्धता को बहुत उच्च स्तर पर बनाए रखने के लिए इसकी मैन्युफैक्चरिंग के बाद कौन सी अंतिम फिनिशिंग प्रक्रिया की जाती है?", e: "To maintain the flatness of a sine bar's top surface and the precision of both rollers' diameters at a very high level, what final finishing process is done after its manufacturing?", oh: ["प्रिसिजन ग्राइंडिंग और लैपिंग (Precision Grinding and Lapping)", "होनिंग", "टर्निंग", "स्क्रैपिंग"], oe: ["Precision Grinding and Lapping", "Honing", "Turning", "Scraping"], a: 0 },
+  { id: 58, h: "पाइप फिटिंग असेंबली में बड़े व्यास वाले पाइपों को अत्यधिक कसने या खोलने के लिए किस रिंच का उपयोग किया जाता है जो पाइप की सतह पर खरोंच नहीं आने देती और चमड़े या नायलॉन की बेल्ट से बनी होती है?", e: "Which wrench is used in pipe fitting assemblies for excessively tightening or loosening large diameter pipes, which does not scratch the pipe surface and is made of a leather or nylon belt?", oh: ["स्टिलसन पाइप रिंच", "चेन पाइप रिंच", "मंकी रिंच", "स्ट्रैप रिंच (Strap Wrench)"], oe: ["Stillson pipe wrench", "Chain pipe wrench", "Monkey wrench", "Strap Wrench"], a: 3 },
+  { id: 59, h: "इलेक्ट्रॉनिक्स और बारीक सोल्डरिंग कार्यों में उपयोग होने वाले कोर-सोल्डर (Rosin-core solder) के अंदर flux के रूप में प्रयुक्त 'Rosin' किस प्राकृतिक पदार्थ से प्राप्त किया जाता है?", e: "'Rosin' used as a flux inside rosin-core solder for electronics and fine soldering work is obtained from which natural substance?", oh: ["पेट्रोलियम बाय-प्रोडक्ट", "जिंक अयस्क", "पेड़ों के रेजिन या गोंद (Resin from pine trees)", "समुद्री साल्ट"], oe: ["Petroleum by-product", "Zinc ore", "Resin from pine trees", "Sea salt"], a: 2 },
+  { id: 60, h: "लुब्रिकेटिंग तेल का 'Pour Point' तापमान वह बिंदु है जिस पर तेलः", e: "The 'Pour Point' temperature of lubricating oil is the point at which the oil:", oh: ["आग पकड़ लेता है", "वाष्पित होना शुरू होता है", "अत्यधिक गाढ़ा होकर बहना बंद कर देता है (Ceases to flow)", "पानी के साथ मिल जाता है"], oe: ["Catches fire", "Starts evaporating", "Becomes excessively thick and ceases to flow", "Mixes with water"], a: 2 },
+  { id: 61, h: "एक मशीन की फाउंडेशन असेंबली में कंपन (Vibrations) के कारण नट को ढीला होने से पूरी तरह रोकने के लिए किस लॉकिंग नट के ऊपर एक पतली कटी हुई स्लॉटेड संरचना होती है जिसमें स्प्लिट पिन फंसाई जाती है?", e: "To completely prevent a nut from loosening due to vibrations in a machine's foundation assembly, which locking nut has a thin slotted structure on top in which a split pin is inserted?", oh: ["स्लॉटेड नट या कैसल नट (Castle Nut/Slotted Nut)", "लॉक नट", "विंग नट", "फ्लैंज नट"], oe: ["Slotted Nut or Castle Nut", "Lock nut", "Wing nut", "Flange nut"], a: 0 },
+  { id: 62, h: "लेथ मशीन के 'Apron Mechanism' में फीड रॉड से ऑटोमैटिक क्रॉस फीड या लोंगिट्यूडिनल फीड प्राप्त करने के लिए किस गियर सेट और क्लच अरेंजमेंट का उपयोग किया जाता है?", e: "Which gear set and clutch arrangement is used in the 'Apron Mechanism' of a lathe machine to obtain automatic cross feed or longitudinal feed from the feed rod?", oh: ["टम्बलर गियर सेट", "हाफ नट मैकेनिज्म", "वर्म, वर्म व्हील और ड्रॉप वॉर्म मैकेनिज्म (Drop Worm Mechanism)", "चेंज गियर ट्रेन"], oe: ["Tumbler gear set", "Half nut mechanism", "Worm, worm wheel and Drop Worm Mechanism", "Change gear train"], a: 2 },
+  { id: 63, h: "ग्राइंडिंग व्हील के निर्माण में प्रयुक्त होने वाले 'Resinoid Bond' को अंतर्राष्ट्रीय मानकों के अनुसार किस अक्षर द्वारा प्रदर्शित किया जाता है?", e: "The 'Resinoid Bond' used in manufacturing a grinding wheel is represented by which letter according to international standards?", oh: ["R", "V", "B", "E"], oe: ["R", "V", "B", "E"], a: 2 },
+  { id: 64, h: "वर्नियर कैलिपर के डेप्थ बार (Depth Bar) का उपयोग करते समय होने वाली 'Parallax Error' को पूरी तरह समाप्त करने के लिए आधुनिक उद्योगों में किस यंत्र को प्राथमिकता दी जा रही है?", e: "To completely eliminate the 'Parallax Error' occurring while using the depth bar of a vernier caliper, which instrument is being preferred in modern industries?", oh: ["डिजिटल वर्नियर कैलिपर (Digital Vernier)", "डायल कैलिपर", "आउटसाइड माइक्रोमीटर", "इनसाइड कैलिपर"], oe: ["Digital Vernier Caliper", "Dial caliper", "Outside micrometer", "Inside caliper"], a: 0 },
+  { id: 65, h: "सिल्वर ब्रेजिंग (Silver Brazing) में स्पैल्टर के रूप में चांदी, तांबा और जस्ता का मिश्रण प्रयुक्त होता है। इसमें चांदी (Silver) मिलाने का मुख्य तकनीकी उद्देश्य क्या है?", e: "In Silver Brazing, a mixture of silver, copper, and zinc is used as a spelter. What is the main technical purpose of adding silver to it?", oh: ["जोड़ को चमकाना", "मेल्टिंग पॉइंट को कम करना और जोड़ की तरलता (Fluidity) बढ़ाना", "जोड़ को भारी बनाना", "फ्लक्स की आवश्यकता समाप्त करना"], oe: ["To polish the joint", "To lower the melting point and increase fluidity of the joint", "To make the joint heavy", "To eliminate the need for flux"], a: 1 },
+  { id: 66, h: "पाइप लाइन में सीधे जा रहे प्रवाह को 90° पर मोड़ने और साथ ही पाइप का व्यास कम करने के लिए किस सिंगल फिटिंग का उपयोग किया जाता है?", e: "Which single fitting is used in a pipeline to bend the straight flow at 90° and simultaneously reduce the pipe diameter?", oh: ["एसेन्ट्रिक रिड्यूसर", "रिड्यूसिंग एल्बो (Reducing Elbow)", "रिड्यूसिंग टी", "हाफ कपलिंग"], oe: ["Eccentric reducer", "Reducing Elbow", "Reducing tee", "Half coupling"], a: 1 },
+  { id: 67, h: "टॉलरेंस के 18 ग्रेड्स में से IT5 से IT11 तक के ग्रेड्स का उपयोग मुख्य रूप से औद्योगिक विनिर्माण में किस कार्य के लिए किया जाता है?", e: "Out of the 18 grades of tolerance, IT5 to IT11 grades are mainly used in industrial manufacturing for what purpose?", oh: ["गेज ब्लॉक निर्माण के लिए", "रफ कास्टिंग कार्यों के लिए", "सामान्य मशीनिंग और फिट्स (General Engineering/Fits) के लिए", "केवल प्रयोगशाला उपकरणों के लिए"], oe: ["For gauge block manufacturing", "For rough casting jobs", "For general machining and fits (General Engineering/Fits)", "Only for laboratory equipment"], a: 2 },
+  { id: 68, h: "सतह की विषमता (Surface Roughness) को मापने की वैज्ञानिक प्रणालियों में 'Ra' मान का पूर्ण रूप क्या है?", e: "What is the full form of the 'Ra' value in scientific systems for measuring surface roughness?", oh: ["Radius of Absolute roughness", "Roughness Average / Arithmetic Mean Deviation", "Root average", "Random Alignment value"], oe: ["Radius of Absolute roughness", "Roughness Average / Arithmetic Mean Deviation", "Root average", "Random Alignment value"], a: 1 },
+  { id: 69, h: "हाई-स्पीड स्टील (HSS) से बने कटिंग टूल्स में टंगस्टन, क्रोमियम और वैनेडियम का सामान्य प्रामाणिक अनुपात क्या होता है?", e: "What is the general standard ratio of Tungsten, Chromium, and Vanadium in cutting tools made of High-Speed Steel (HSS)?", oh: ["4:18:1", "18:4:1", "1:4:18", "10:5:2"], oe: ["4:18:1", "18:4:1", "1:4:18", "10:5:2"], a: 1 },
+  { id: 70, h: "बिजली के उपकरणों और तेल में लगी आग (Class B & C) को बुझाने के लिए किस अग्निशामक का उपयोग किया जाता है जो ऑक्सीजन की सप्लाई को काटकर आग को दबा देता है और कोई अवशेष नहीं छोड़ता?", e: "Which fire extinguisher is used to extinguish fires involving electrical equipment and oil (Class B & C) that suppresses the fire by cutting off the oxygen supply and leaves no residue?", oh: ["सोडा एसिड प्रकार", "पानी की बौछार", "फोम प्रकार", "कार्बन डाइऑक्साइड या सीटीसी (CO2/CTC)"], oe: ["Soda acid type", "Water spray", "Foam type", "Carbon Dioxide or CTC (CO2/CTC)"], a: 3 },
+  // Non-Technical (Haryana GK, Math, Reasoning, Computer)
+  { id: 71, h: "हरियाणा के किस ऐतिहासिक स्थान पर भारत का पहला 'PM-Mitra' मेगा टेक्सटाइल पार्क स्थापित करने की घोषणा की गई है?", e: "At which historical place in Haryana has the establishment of India's first 'PM-Mitra' Mega Textile Park been announced?", oh: ["धारूहेड़ा", "पानीपत", "मानेसर (गुरुग्राम)", "हिसार"], oe: ["Dharuhera", "Panipat", "Manesar (Gurugram)", "Hisar"], a: 1 },
+  { id: 72, h: "हरियाणा के किस जिले में देश का पहला 'Aviation Hub' (उड्डयन केंद्र) विकसित किया गया है जहाँ महाराजा अग्रसेन अंतर्राष्ट्रीय हवाई अड्डा स्थित है?", e: "In which district of Haryana is the country's first 'Aviation Hub' being developed, where Maharaja Agrasen International Airport is located?", oh: ["अम्बाला", "करनाल", "रोहतक", "हिसार"], oe: ["Ambala", "Karnal", "Rohtak", "Hisar"], a: 3 },
+  { id: 73, h: "'Haryana State Seed Certification Agency' का मुख्यालय कहाँ स्थित है?", e: "Where is the headquarters of 'Haryana State Seed Certification Agency' located?", oh: ["पंचकुला", "करनाल", "हिसार", "रोहतक"], oe: ["Panchkula", "Karnal", "Hisar", "Rohtak"], a: 0 },
+  { id: 74, h: "वर्ष 2024 के हरियाणा विधानसभा चुनाव में कुल कितनी महिलाएँ विधायक चुनी गईं, जो अब तक का एक महत्वपूर्ण रिकॉर्ड है?", e: "In the 2024 Haryana Assembly Elections, how many women MLAs were elected in total, which is an important record so far?", oh: ["9", "11", "13", "15"], oe: ["9", "11", "13", "15"], a: 2 },
+  { id: 75, h: "हरियाणा के किस जिले को 'शहीदों का शहर' कहा जाता है, जहाँ से 1857 की क्रांति के महानायक राव तुला राम संबंधित थे?", e: "Which district of Haryana is called the 'City of Martyrs', from where Rao Tula Ram, the hero of the 1857 revolution, belonged?", oh: ["झज्जर", "अम्बाला", "रेवाड़ी", "पानीपत"], oe: ["Jhajjar", "Ambala", "Rewari", "Panipat"], a: 2 },
+  { id: 76, h: "(Math) यदि दो संख्याओं का योग 25 है और उनका अंतर 13 है, तो उन दोनों संख्याओं का गुणनफल (Product) क्या होगा?", e: "(Math) If the sum of two numbers is 25 and their difference is 13, then what will be the product of those two numbers?", oh: ["114", "108", "156", "120"], oe: ["114", "108", "156", "120"], a: 0 },
+  { id: 77, h: "(Reasoning) यदि किसी निश्चित कूट भाषा में 'FITTER' को 'GJUUGS' लिखा जाता है, तो उसी भाषा में 'TURNER' को क्या लिखा जाएगा?", e: "(Reasoning) If in a certain code language 'FITTER' is written as 'GJUUGS', then how will 'TURNER' be written in the same language?", oh: ["UVSOFS", "UVSNFS", "UVSPFS", "UTROFS"], oe: ["UVSOFS", "UVSNFS", "UVSPFS", "UTROFS"], a: 0 },
+  { id: 78, h: "हरियाणा की प्रसिद्ध 'हथनीकुंड बैराज' परियोजना यमुनानगर में किस वर्ष पुराने ताजेवाला बैराज के स्थान पर पूर्ण रूप से चालू की गई थी?", e: "In which year was Haryana's famous 'Hathnikund Barrage' project fully commissioned in Yamunanagar in place of the old Tajewala Barrage?", oh: ["1975", "1966", "1999", "2005"], oe: ["1975", "1966", "1999", "2005"], a: 2 },
+  { id: 79, h: "नीरज चोपड़ा ने पेरिस पैरालंपिक / ओलंपिक खेलों के चक्र में भारत के लिए लगातार दूसरा पदक जीता। उनका संबंध हरियाणा के किस गाँव से है?", e: "Neeraj Chopra won the second consecutive medal for India in the Paris Olympic cycle. Which village in Haryana does he belong to?", oh: ["खांडरा (पानीपत)", "बलाली (चरखी दादरी)", "नाहरी (सोनीपत)", "शाहबाद (कुरुक्षेत्र)"], oe: ["Khandra (Panipat)", "Balali (Charkhi Dadri)", "Nahari (Sonipat)", "Shahbad (Kurukshetra)"], a: 0 },
+  { id: 80, h: "हरियाणा के किस स्थान को 'कपिस्थल' के नाम से जाना जाता था, जिसे भगवान हनुमान की जन्मस्थली माना जाता है?", e: "Which place in Haryana was known as 'Kapisthal', which is considered the birthplace of Lord Hanuman?", oh: ["करनाल", "कुरुक्षेत्र", "कैथल", "जींद"], oe: ["Karnal", "Kurukshetra", "Kaithal", "Jind"], a: 2 },
+  { id: 81, h: "(Math) एक ठोस धात्विक गोले की त्रिज्या 3 cm है। इसे पिघलाकर 0.2 cm व्यास का एक तार बनाया जाता है। तार की कुल लंबाई क्या होगी?", e: "(Math) The radius of a solid metallic sphere is 3 cm. It is melted and drawn into a wire of 0.2 cm diameter. What will be the total length of the wire?", oh: ["36 मीटर", "18 मीटर", "360 मीटर", "180 मीटर"], oe: ["36 meters", "18 meters", "360 meters", "180 meters"], a: 0 },
+  { id: 82, h: "घग्गर नदी हरियाणा के किस जिले से होकर राज्य में प्रवेश करती है और ओटू बैराज का निर्माण करती है?", e: "Through which district of Haryana does the Ghaggar river enter the state and form the Ottu Barrage?", oh: ["अम्बाला", "पंचकुला (कालका)", "सिरसा", "फतेहाबाद"], oe: ["Ambala", "Panchkula (Kalka)", "Sirsa", "Fatehabad"], a: 1 },
+  { id: 83, h: "हरियाणा की 'सुखना झील' जो कि अब चंडीगढ़ का एक मुख्य हिस्सा है, का निर्माण किस वर्ष किया गया था और इसके मुख्य वास्तुकार कौन थे?", e: "In which year was Haryana's 'Sukhna Lake', which is now a major part of Chandigarh, built and who was its chief architect?", oh: ["1958, ली कार्बुज़िए", "1966, नेक चंद", "1950, एडविन लुटियंस", "1970, अल्बर्ट मेयर"], oe: ["1958, Le Corbusier", "1966, Nek Chand", "1950, Edwin Lutyens", "1970, Albert Mayer"], a: 0 },
+  { id: 84, h: "(Reasoning) श्रृंखला में लुप्त पद ज्ञात करें: 3, 7, 15, 31, 63, ?", e: "(Reasoning) Find the missing term in the series: 3, 7, 15, 31, 63, ?", oh: ["95", "125", "127", "131"], oe: ["95", "125", "127", "131"], a: 2 },
+  { id: 85, h: "हरियाणा के किस मुख्यमंत्री का कार्यकाल राज्य में सबसे लंबा (लगातार और कुल मिलाकर दोनों संदर्भों में सबसे प्रभावशाली) रहा है?", e: "Which Chief Minister of Haryana has had the longest tenure (most influential both continuously and overall) in the state?", oh: ["भजन लाल", "बंसी लाल", "देवी लाल", "भूपेंद्र सिंह हुड्डा"], oe: ["Bhajan Lal", "Bansi Lal", "Devi Lal", "Bhupinder Singh Hooda"], a: 0 },
+  { id: 86, h: "'केंद्रीय मृदा लवणता अनुसंधान संस्थान' (CSSRI) हरियाणा के किस शहर में स्थित है?", e: "In which city of Haryana is the 'Central Soil Salinity Research Institute' (CSSRI) located?", oh: ["हिसार", "करनाल", "रोहतक", "कुरुक्षेत्र"], oe: ["Hisar", "Karnal", "Rohtak", "Kurukshetra"], a: 1 },
+  { id: 87, h: "हरियाणा का कौन सा जिला विशेष रूप से 'मिट्टी के बर्तनों' (Pottery) और क्ले आर्ट के लिए राष्ट्रीय स्तर पर पहचाना जाता है?", e: "Which district of Haryana is specifically recognized nationally for 'Pottery' and clay art?", oh: ["झज्जर", "रोहतक", "गुरुग्राम (सिकंदरपुर)", "फरीदाबाद"], oe: ["Jhajjar", "Rohtak", "Gurugram (Sikanderpur)", "Faridabad"], a: 0 },
+  { id: 88, h: "(Math) एक वस्तु को ₹450 में बेचने पर एक दुकानदार को 10% की हानि होती है। 10% का लाभ कमाने के लिए उसे वस्तु को किस मूल्य पर बेचना चाहिए?", e: "(Math) By selling an article for ₹450, a shopkeeper makes a loss of 10%. At what price should he sell the article to make a profit of 10%?", oh: ["₹500", "₹600", "₹550", "₹525"], oe: ["₹500", "₹600", "₹550", "₹525"], a: 2 },
+  { id: 89, h: "हरियाणा सरकार की 'चिरायु योजना' का मुख्य उद्देश्य राज्य के नागरिकों को क्या प्रदान करना है?", e: "What is the main objective of Haryana Government's 'Chirayu Yojana' to provide to the citizens of the state?", oh: ["मुफ्त शिक्षा", "₹5 लाख तक का मुफ्त स्वास्थ्य बीमा (Health Insurance)", "सौर ऊर्जा सब्सिडी", "बेरोजगारी भत्ता"], oe: ["Free education", "Free Health Insurance up to ₹5 lakh", "Solar energy subsidy", "Unemployment allowance"], a: 1 },
+  { id: 90, h: "भौगोलिक दृष्टि से हरियाणा का कौन सा जिला तीन ओर से राजस्थान राज्य से घिरा हुआ है?", e: "Geographically, which district of Haryana is surrounded by the state of Rajasthan on three sides?", oh: ["महेंद्रगढ़", "रेवाड़ी", "सिरसा", "मेवात"], oe: ["Mahendragarh", "Rewari", "Sirsa", "Mewat"], a: 0 },
+  { id: 91, h: "कंप्यूटर नेटवर्किंग में 'IPv6' (Internet Protocol version 6) एड्रेस का साइज कितने बिट्स का होता है?", e: "In computer networking, what is the size of an 'IPv6' (Internet Protocol version 6) address in bits?", oh: ["32 बिट्स", "128 बिट्स", "64 बिट्स", "256 बिट्स"], oe: ["32 bits", "128 bits", "64 bits", "256 bits"], a: 1 },
+  { id: 92, h: "MS Word 2019 में, किसी वाक्य को बिना माउस के केवल कीबोर्ड शॉर्टकट से 'Subscript' (जैसे H2O में 2) करने की शॉर्टकट कुंजी क्या है?", e: "In MS Word 2019, what is the shortcut key to format a sentence as 'Subscript' (like 2 in H2O) using only the keyboard without a mouse?", oh: ["Ctrl + Shift + +", "Alt + Shift + S", "Ctrl + =", "Ctrl + Shift + <"], oe: ["Ctrl + Shift + +", "Alt + Shift + S", "Ctrl + =", "Ctrl + Shift + <"], a: 2 },
+  { id: 93, h: "कंप्यूटर सुरक्षा में 'Ransomware' का मुख्य कार्य क्या होता है?", e: "What is the main function of 'Ransomware' in computer security?", oh: ["कंप्यूटर की गति बढ़ाना", "फाइलों को एन्क्रिप्ट करके उन्हें खोलने के बदले फिरौती (Money) मांगना", "ईमेल को डिलीट करना", "विज्ञापनों को दिखाना"], oe: ["Speed up the computer", "Encrypt files and demand a ransom (Money) in exchange for opening them", "Delete emails", "Show advertisements"], a: 1 },
+  { id: 94, h: "किस कंप्यूटर पीढ़ी (Generation) में पहली बार 'Core microprocessors' और 'Ultrashort-scale integration' (ULSI) तकनीक का उपयोग शुरू हुआ?", e: "In which computer generation was the use of 'Core microprocessors' and 'Ultrashort-scale integration' (ULSI) technology first started?", oh: ["चौथी पीढ़ी", "तीसरी पीढ़ी", "पाँचवीं पीढ़ी", "दूसरी पीढ़ी"], oe: ["Fourth generation", "Third generation", "Fifth generation", "Second generation"], a: 2 },
+  { id: 95, h: "कंप्यूटर की मुख्य मेमोरी (RAM) और प्रोसेसर (CPU) के बीच डेटा ट्रांसफर की गति के अंतर को कम करने के लिए किस अत्यंत तीव्र गति वाली स्टेटिक मेमोरी का उपयोग किया जाता है?", e: "To reduce the difference in data transfer speed between a computer's main memory (RAM) and the processor (CPU), which extremely high-speed static memory is used?", oh: ["वर्चुअल मेमोरी", "फ्लैश ड्राइव", "कैश मेमोरी (Cache Memory)", "रोम"], oe: ["Virtual memory", "Flash drive", "Cache Memory", "ROM"], a: 2 },
+  { id: 96, h: "डेटाबेस मैनेजमेंट सिस्टम में 'SQL' का पूर्ण रूप क्या होता है?", e: "What is the full form of 'SQL' in Database Management System?", oh: ["Structured Query Language", "Simple Queue System", "Standard Query Logic", "Sequential Query Law"], oe: ["Structured Query Language", "Simple Queue System", "Standard Query Logic", "Sequential Query Law"], a: 0 },
+  { id: 97, h: "MS Excel में किसी एक्टिव सेल के अंदर लगे फॉर्मूले को एडिट करने या उसकी पूरी सामग्री को देखने के लिए कीबोर्ड की किस फंक्शन की (Function Key) का उपयोग किया जाता है?", e: "In MS Excel, which keyboard Function Key is used to edit a formula applied inside an active cell or to view its entire contents?", oh: ["F1", "F5", "F2", "F9"], oe: ["F1", "F5", "F2", "F9"], a: 2 },
+  { id: 98, h: "कंप्यूटर आर्किटेक्चर में, कर्सर के ठीक बाईं ओर (Left side) के एक पूरे शब्द (Word) को एक साथ मिटाने के लिए किस की-कॉम्बिनेशन का उपयोग किया जाता है?", e: "In computer architecture, which key combination is used to delete an entire word completely at once just to the left side of the cursor?", oh: ["Backspace", "Shift + Delete", "Ctrl + Backspace", "Ctrl + Delete"], oe: ["Backspace", "Shift + Delete", "Ctrl + Backspace", "Ctrl + Delete"], a: 2 },
+  { id: 99, h: "सुपर कंप्यूटर की गति को मापने के लिए सामान्यतः किस इकाई (Unit) का उपयोग किया जाता है?", e: "Which unit is generally used to measure the speed of a supercomputer?", oh: ["MIPS", "FLOPS (Floating Point Operations Per Second)", "Mbps", "GHz"], oe: ["MIPS", "FLOPS (Floating Point Operations Per Second)", "Mbps", "GHz"], a: 1 },
+  { id: 100, h: "इनमें से कौन सा एक ओपन-सोर्स (Open-source) ऑपरेटिंग सिस्टम का उदाहरण है जिसका सोर्स कोड इंटरनेट पर मुफ्त उपलब्ध है?", e: "Which of the following is an example of an open-source operating system whose source code is freely available on the Internet?", oh: ["Windows 11", "macOS", "Linux (Ubuntu)", "MS Office 365"], oe: ["Windows 11", "macOS", "Linux (Ubuntu)", "MS Office 365"], a: 2 }
 ];
 
-const App = () => {
-  const [userAnswers, setUserAnswers] = useState({});
+export default function App() {
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [answers, setAnswers] = useState({});
+  const [timeLeft, setTimeLeft] = useState(100 * 60); // 100 minutes in seconds
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [showReview, setShowReview] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(100 * 60); // 100 Minutes in seconds
-  const [results, setResults] = useState({ score: 0, accuracy: 0, rank: 0, unattempted: 0 });
-  const [lang, setLang] = useState('en'); // 'en' or 'hi'
+  const [language, setLanguage] = useState('hi'); // 'hi' or 'en'
+  const [showAnalysis, setShowAnalysis] = useState(false);
+  const [results, setResults] = useState(null);
 
   useEffect(() => {
-    if (timeLeft <= 0 && !isSubmitted) {
-      handleSubmit();
-      return;
-    }
-    let timer;
-    if (!isSubmitted) {
-      timer = setInterval(() => setTimeLeft((prev) => prev - 1), 1000);
-    }
-    return () => clearInterval(timer);
-  }, [timeLeft, isSubmitted]);
+    if (isSubmitted) return;
 
-  const handleOptionChange = (qId, optionIdx) => {
-    if (!isSubmitted) {
-      setUserAnswers({ ...userAnswers, [qId]: optionIdx });
-    }
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          handleSubmit();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [isSubmitted]);
+
+  const handleOptionSelect = (optionIndex) => {
+    setAnswers({
+      ...answers,
+      [currentQuestionIndex]: optionIndex,
+    });
   };
 
-  const handleSubmit = useCallback(() => {
+  const handleSubmit = () => {
+    setIsSubmitted(true);
     let correctCount = 0;
-    questions.forEach((q) => {
-      if (userAnswers[q.id] === q.ans) correctCount++;
+    
+    questionsData.forEach((q, index) => {
+      if (answers[index] === q.a) {
+        correctCount++;
+      }
     });
 
-    const totalAttempted = Object.keys(userAnswers).length;
-    const accuracy = totalAttempted > 0 ? (correctCount / totalAttempted) * 100 : 0;
-    const unattempted = questions.length - totalAttempted;
-    
-    const mockTotalCandidates = 5000;
-    const rank = Math.floor(mockTotalCandidates - (correctCount / questions.length) * mockTotalCandidates) + 1;
+    const accuracy = ((correctCount / questionsData.length) * 100).toFixed(2);
+    // Mock Rank logic: Calculate rank out of 1000 candidates based on score. 
+    // Higher score = better (lower) rank number.
+    const mockRank = Math.max(1, 1000 - (correctCount * 10) + Math.floor(Math.random() * 20));
 
-    setResults({ score: correctCount, accuracy, rank, unattempted });
-    setIsSubmitted(true);
-  }, [userAnswers]);
-
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    setResults({
+      score: correctCount,
+      total: questionsData.length,
+      accuracy,
+      rank: mockRank
+    });
   };
 
-  return (
-    <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif', maxWidth: '800px', margin: 'auto' }}>
-      <header style={{ position: 'sticky', top: 0, background: '#fff', padding: '15px', borderBottom: '2px solid #ddd', zIndex: 100, boxShadow: '0 4px 6px -6px #222' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-          <h2 style={{ margin: 0 }}>HSSC CET ALM Mock Test</h2>
-          <button 
-            onClick={() => setLang(lang === 'en' ? 'hi' : 'en')}
-            style={{ padding: '8px 15px', background: '#e0a800', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}
-          >
-            A / अ  {lang === 'en' ? 'Translate to Hindi' : 'Translate to English'}
-          </button>
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.1rem', color: timeLeft < 300 && !isSubmitted ? '#d9534f' : '#333' }}>
-          <strong>{isSubmitted ? (lang === 'en' ? "Test Finished" : "परीक्षण समाप्त") : `⏳ Time Remaining: ${formatTime(timeLeft)}`}</strong>
-          <strong>📊 Attempted: {Object.keys(userAnswers).length} / {questions.length}</strong>
-        </div>
-      </header>
+  const formatTime = (seconds) => {
+    const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+    const s = (seconds % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+  };
 
-      {!isSubmitted ? (
-        <main style={{ marginTop: '20px' }}>
-          {questions.map((q, index) => {
-            const displayQuestion = lang === 'hi' && q.q_hi ? q.q_hi : q.q;
-            return (
-              <div key={q.id} style={{ margin: '20px 0', padding: '20px', borderRadius: '8px', background: '#f8f9fa', border: '1px solid #e9ecef' }}>
-                <p style={{ fontSize: '1.1rem', marginBottom: '15px' }}><strong>Q{index + 1}:</strong> {displayQuestion}</p>
-                {q.options.map((opt, i) => {
-                  const displayOption = lang === 'hi' && q.options_hi ? q.options_hi[i] : opt;
+  const q = questionsData[currentQuestionIndex];
+  const questionText = language === 'hi' ? q.h : q.e;
+  const optionsList = language === 'hi' ? q.oh : q.oe;
+
+  if (showAnalysis) {
+    return (
+      <div style={{ padding: '20px', fontFamily: 'sans-serif', maxWidth: '800px', margin: '0 auto' }}>
+        <h2>Test Analysis</h2>
+        <button onClick={() => setShowAnalysis(false)} style={btnStyle}>Back to Results</button>
+        <button onClick={() => setLanguage(language === 'hi' ? 'en' : 'hi')} style={{...btnStyle, marginLeft: '10px', background: '#555'}}>
+          Translate to {language === 'hi' ? 'English' : 'Hindi'}
+        </button>
+        <hr />
+        {questionsData.map((quest, idx) => {
+          const userAnswer = answers[idx];
+          const isCorrect = userAnswer === quest.a;
+          const isAttempted = userAnswer !== undefined;
+
+          return (
+            <div key={quest.id} style={{ marginBottom: '20px', padding: '15px', border: `2px solid ${isAttempted ? (isCorrect ? 'green' : 'red') : 'gray'}`, borderRadius: '5px' }}>
+              <h4>Q{quest.id}. {language === 'hi' ? quest.h : quest.e}</h4>
+              <ul style={{ listStyle: 'none', paddingLeft: 0 }}>
+                {(language === 'hi' ? quest.oh : quest.oe).map((opt, oIdx) => {
+                  let bgColor = 'transparent';
+                  if (oIdx === quest.a) bgColor = '#d4edda'; // Correct answer highlights green
+                  else if (oIdx === userAnswer && !isCorrect) bgColor = '#f8d7da'; // Wrong chosen answer highlights red
+
                   return (
-                    <label key={i} style={{ display: 'block', margin: '10px 0', cursor: 'pointer', padding: '10px', background: '#fff', borderRadius: '5px', border: '1px solid #ced4da' }}>
-                      <input
-                        type="radio"
-                        name={`q-${q.id}`}
-                        checked={userAnswers[q.id] === i}
-                        onChange={() => handleOptionChange(q.id, i)}
-                        style={{ marginRight: '10px' }}
-                      /> 
-                      {displayOption}
-                    </label>
+                    <li key={oIdx} style={{ padding: '8px', background: bgColor, borderRadius: '4px', marginBottom: '5px' }}>
+                      {String.fromCharCode(65 + oIdx)}. {opt}
+                    </li>
                   );
                 })}
-              </div>
-            );
-          })}
-          <button 
-            onClick={handleSubmit}
-            style={{ padding: '15px 30px', background: '#007bff', color: '#fff', fontSize: '1.2rem', fontWeight: 'bold', border: 'none', borderRadius: '5px', cursor: 'pointer', width: '100%', marginTop: '20px' }}
-          >
-            {lang === 'hi' ? "टेस्ट सबमिट करें" : "Submit Test"}
+              </ul>
+              <p>
+                <strong>Status:</strong> {isAttempted ? (isCorrect ? '✅ Correct' : '❌ Incorrect') : '⚠️ Unattempted'}
+              </p>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
+  if (isSubmitted && results) {
+    return (
+      <div style={{ padding: '40px', fontFamily: 'sans-serif', textAlign: 'center' }}>
+        <h2>Test Submitted Successfully!</h2>
+        <h1>Score: {results.score} / {results.total}</h1>
+        <h3>Accuracy: {results.accuracy}%</h3>
+        <h3>Your Rank: {results.rank} out of 1000 candidates</h3>
+        
+        <div style={{ marginTop: '30px' }}>
+          <button onClick={() => setShowAnalysis(true)} style={btnStyle}>View Test Analysis</button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ padding: '20px', fontFamily: 'sans-serif', maxWidth: '800px', margin: '0 auto' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f4f4f4', padding: '15px', borderRadius: '8px', marginBottom: '20px' }}>
+        <h2 style={{ margin: 0 }}>Time Left: <span style={{ color: timeLeft < 600 ? 'red' : 'black' }}>{formatTime(timeLeft)}</span></h2>
+        <div>
+          <button onClick={() => setLanguage(language === 'hi' ? 'en' : 'hi')} style={{...btnStyle, background: '#333', marginRight: '10px'}}>
+            Translate: {language === 'hi' ? 'Eng' : 'हिन्दी'}
           </button>
-        </main>
-      ) : (
-        <section style={{ marginTop: '30px' }}>
-          <div style={{ textAlign: 'center', padding: '40px', border: '3px solid #28a745', borderRadius: '15px', background: '#f8fff9', marginBottom: '30px' }}>
-            <h2 style={{ color: '#28a745', fontSize: '2rem', margin: '0 0 20px 0' }}>{lang === 'hi' ? "परीक्षा परिणाम" : "Test Results"}</h2>
-            <div style={{ fontSize: '1.2rem', lineHeight: '2' }}>
-              <p><strong>{lang === 'hi' ? "कुल अंक:" : "Total Score:"}</strong> {results.score} / {questions.length}</p>
-              <p><strong>{lang === 'hi' ? "छोड़े गए प्रश्न:" : "Unattempted:"}</strong> {results.unattempted}</p>
-              <p><strong>{lang === 'hi' ? "सटीकता:" : "Accuracy:"}</strong> {results.accuracy.toFixed(2)}%</p>
-              <p><strong>{lang === 'hi' ? "अनुमानित रैंक:" : "Estimated Rank:"}</strong> #{results.rank} {lang === 'hi' ? "(5,000 उम्मीदवारों में से)" : "out of 5,000 candidates"}</p>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', marginTop: '25px' }}>
-              <button 
-                onClick={() => window.location.reload()} 
-                style={{ padding: '12px 25px', background: '#6c757d', color: '#fff', fontSize: '1.1rem', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
-              >
-                {lang === 'hi' ? "फिर से टेस्ट दें" : "Retake Test"}
-              </button>
-              <button 
-                onClick={() => setShowReview(!showReview)} 
-                style={{ padding: '12px 25px', background: '#17a2b8', color: '#fff', fontSize: '1.1rem', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
-              >
-                {showReview ? (lang === 'hi' ? "विश्लेषण छुपाएं" : "Hide Analysis") : (lang === 'hi' ? "उत्तरों की समीक्षा करें" : "Review Answers")}
-              </button>
-            </div>
-          </div>
+          <button onClick={handleSubmit} style={{...btnStyle, background: '#d9534f'}}>Submit Test</button>
+        </div>
+      </div>
 
-          {showReview && (
-            <div style={{ marginTop: '20px' }}>
-              <h3 style={{ borderBottom: '2px solid #ccc', paddingBottom: '10px' }}>{lang === 'hi' ? "विस्तृत विश्लेषण" : "Detailed Analysis"}</h3>
-              {questions.map((q, index) => {
-                const isUnattempted = userAnswers[q.id] === undefined;
-                const isCorrect = userAnswers[q.id] === q.ans;
-                const displayQuestion = lang === 'hi' && q.q_hi ? q.q_hi : q.q;
-                
-                let containerStyle = { margin: '20px 0', padding: '20px', borderRadius: '8px', border: '1px solid #ccc' };
-                if (isUnattempted) {
-                  containerStyle.background = '#fff3cd'; 
-                  containerStyle.borderColor = '#ffeeba';
-                } else if (isCorrect) {
-                  containerStyle.background = '#d4edda'; 
-                  containerStyle.borderColor = '#c3e6cb';
-                } else {
-                  containerStyle.background = '#f8d7da'; 
-                  containerStyle.borderColor = '#f5c6cb';
-                }
+      <div style={{ border: '1px solid #ddd', padding: '20px', borderRadius: '8px' }}>
+        <h3>Question {currentQuestionIndex + 1} of 100</h3>
+        <p style={{ fontSize: '18px', lineHeight: '1.6' }}>{questionText}</p>
+        
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '20px' }}>
+          {optionsList.map((opt, idx) => (
+            <label key={idx} style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '5px', cursor: 'pointer', background: answers[currentQuestionIndex] === idx ? '#e9ecef' : 'white' }}>
+              <input 
+                type="radio" 
+                name="option" 
+                checked={answers[currentQuestionIndex] === idx} 
+                onChange={() => handleOptionSelect(idx)}
+                style={{ marginRight: '10px' }}
+              />
+              {String.fromCharCode(65 + idx)}. {opt}
+            </label>
+          ))}
+        </div>
+      </div>
 
-                return (
-                  <div key={q.id} style={containerStyle}>
-                    <p style={{ fontSize: '1.1rem', marginBottom: '15px' }}>
-                      <strong>Q{index + 1}:</strong> {displayQuestion}
-                      <span style={{ marginLeft: '15px', fontSize: '0.9rem', fontWeight: 'bold', color: isUnattempted ? '#856404' : isCorrect ? '#155724' : '#721c24' }}>
-                        [{isUnattempted ? (lang === 'hi' ? "प्रयास नहीं किया" : "Unattempted") : isCorrect ? (lang === 'hi' ? "सही" : "Correct") : (lang === 'hi' ? "गलत" : "Incorrect")}]
-                      </span>
-                    </p>
-                    
-                    {q.options.map((opt, i) => {
-                      const displayOption = lang === 'hi' && q.options_hi ? q.options_hi[i] : opt;
-                      let optStyle = { display: 'block', margin: '10px 0', padding: '10px', borderRadius: '5px', border: '1px solid #ced4da', background: '#fff' };
-                      
-                      if (i === q.ans) {
-                        optStyle.background = '#c3e6cb';
-                        optStyle.borderColor = '#28a745';
-                        optStyle.fontWeight = 'bold';
-                      } else if (i === userAnswers[q.id]) {
-                        optStyle.background = '#f5c6cb';
-                        optStyle.borderColor = '#dc3545';
-                        optStyle.textDecoration = 'line-through';
-                      }
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
+        <button 
+          onClick={() => setCurrentQuestionIndex(prev => Math.max(0, prev - 1))} 
+          disabled={currentQuestionIndex === 0}
+          style={btnStyle}
+        >
+          Previous
+        </button>
+        <button 
+          onClick={() => setCurrentQuestionIndex(prev => Math.min(questionsData.length - 1, prev + 1))} 
+          disabled={currentQuestionIndex === questionsData.length - 1}
+          style={btnStyle}
+        >
+          Next
+        </button>
+      </div>
 
-                      return (
-                        <div key={i} style={optStyle}>
-                          <input
-                            type="radio"
-                            readOnly
-                            checked={userAnswers[q.id] === i}
-                            style={{ marginRight: '10px' }}
-                          /> 
-                          {displayOption}
-                          {i === q.ans && <span style={{ marginLeft: '10px', color: '#155724' }}>✓ {lang === 'hi' ? "सही उत्तर" : "Correct Answer"}</span>}
-                          {i === userAnswers[q.id] && i !== q.ans && <span style={{ marginLeft: '10px', color: '#721c24' }}>✗ {lang === 'hi' ? "आपकी पसंद" : "Your Choice"}</span>}
-                        </div>
-                      );
-                    })}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </section>
-      )}
+      <div style={{ marginTop: '30px' }}>
+        <h4>Question Palette</h4>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
+          {questionsData.map((_, idx) => (
+            <button 
+              key={idx} 
+              onClick={() => setCurrentQuestionIndex(idx)}
+              style={{
+                width: '35px', height: '35px', 
+                background: currentQuestionIndex === idx ? '#007bff' : answers[idx] !== undefined ? '#28a745' : '#e0e0e0',
+                color: currentQuestionIndex === idx || answers[idx] !== undefined ? 'white' : 'black',
+                border: 'none', borderRadius: '4px', cursor: 'pointer'
+              }}
+            >
+              {idx + 1}
+            </button>
+          ))}
+        </div>
+      </div>
     </div>
   );
-};
+}
 
-export default App;
+const btnStyle = {
+  padding: '10px 20px',
+  background: '#007bff',
+  color: 'white',
+  border: 'none',
+  borderRadius: '5px',
+  cursor: 'pointer',
+  fontSize: '16px'
+};
